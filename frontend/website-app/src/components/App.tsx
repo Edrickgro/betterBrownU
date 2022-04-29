@@ -1,10 +1,11 @@
 import React from 'react';
 import '../App.css';
-import Menu from "./Menu";
-import Home from "./Home";
-import Geolocator from "./Geolocator";
-import Calendar from "./Calendar";
-import Account from "./Account";
+import Menu from "./navigation/Navigation";
+import { NavLink } from "react-router-dom";
+import Home from "./home/Home";
+import Geolocator from "./geolocator/Geolocator";
+import Calendar from "./calendar/Calendar";
+import Account from "./account/Account";
 
 
 function App() {
@@ -20,11 +21,6 @@ function App() {
               <Menu/>
           </div>
       </header>
-
-      <Home/>
-      <Geolocator/>
-      <Calendar/>
-      <Account/>
     </div>
   );
 }
@@ -33,4 +29,9 @@ export default App;
 
 /*
 <div className="header-title">unify</div>
+
+    <Home/>
+      <Geolocator/>
+      <Calendar/>
+      <Account/>
  */

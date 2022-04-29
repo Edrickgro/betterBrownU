@@ -3,7 +3,7 @@
   scroll-behavior: smooth;
 }
 
-.App-header {
+.navbar-brand {
   background-color: #381C00;
   min-height: 25vh;
   display: flex;
@@ -43,24 +43,32 @@
   color: #61dafb;
 }
 
-.Menu {
-  /*background-color: #381C00;
-  margin-left: auto;*/
+.navigation {
+  background-color: #381C00;
+  /*margin-left: auto;
   margin-right: 40px;
   float: right;
   display: inline-block;
-  margin-top: 40px;
+  margin-top: 40px;*/
 }
 
-.Menu ul {
-  /*background-color: #381C00;*/
+.container {
+  background-color: #381C00;
+}
+
+.navigation nav {
+  /*background-color: #381C00;
   display: flex;
   list-style-type: none;
-  padding: 0;
+  padding: 0;*/
 }
 
-.Menu li {
-  display: inline;
+.ul {
+  display: inline-block;
+}
+
+.navigation li {
+  display: inline-block;
   flex-grow: 1;
 }
 
@@ -114,17 +122,6 @@
   right: 0;
 }
 
-.Menu a:hover {
-
-  background-color: white;
-  color: black;
-}
-
-.Menu a.active {
-  background-color: black;
-  color: white;
-}
-
 .hide {
   display: none;
 }
@@ -154,22 +151,4 @@ table td {
 
 .table-a {
   color: gold;
-}
-
-.geolocator-location {
-
-}
-
-
-
-#calendar {
-  display: none;
-}
-
-#account {
-  display: none;
-}
-
-#geolocator {
-  display: none;
 }

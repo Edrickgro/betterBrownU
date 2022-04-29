@@ -95,8 +95,6 @@ function Geolocator() {
                         </tr>)}
                 </tbody>
             </table>
-
-
         </div>
     );
 }
