@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { signInWithGoogle} from "../../firebase";
 
 function Home() {
 
@@ -8,7 +9,12 @@ function Home() {
             <div>Welcome to the Better BrownU Website! </div>
             <div>Go to the calendar to see all the exciting
             events Brown has to offer or go to the campus location page to see how busy campus
-            locations are.</div>
+            locations are.
+            </div>
+            <div>
+                <button onClick={ signInWithGoogle }>Sign In With Google</button>
+            </div>
+
         </div>
     );
 }
