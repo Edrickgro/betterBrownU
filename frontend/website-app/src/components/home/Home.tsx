@@ -11,9 +11,6 @@ function Home() {
             events Brown has to offer or go to the campus location page to see how busy campus
             locations are.
             </div>
-            <div>
-                <button onClick={ signInWithGoogle }>Sign In With Google</button>
-            </div>
 
         </div>
     );
