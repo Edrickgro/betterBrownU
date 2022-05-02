@@ -7,37 +7,29 @@ function Navigation() {
 
         <div className="navigation">
             <nav className="navbar">
-                <div className="container">
+                <div>
                     <a href="https://www.brown.edu/">
                         <img className="brown-logo-img" src="brown-logo-white.png"/>
                     </a>
-                    <NavLink className="navbar-brand" to="/">
-                        Brown University
+                </div>
+
+                <div className="navbar-items">
+                    <NavLink className="nav-link" to="/">
+                        Home
+                        <span className="sr-only">(current)</span>
                     </NavLink>
 
-                    <ul className="navbar-nav ml-auto">
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/">
-                                Home
-                                <span className="sr-only">(current)</span>
-                            </NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/calendar">
-                                <span>Calendar</span>
-                            </NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/campuslocations">
-                                Campus Locations
-                            </NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/account">
-                                Account
-                            </NavLink>
-                        </li>
-                    </ul>
+                    <NavLink className="nav-link" to="/calendar">
+                        Calendar
+                    </NavLink>
+
+                    <NavLink className="nav-link" to="/campus-locations">
+                        Campus Locations
+                    </NavLink>
+
+                    <NavLink className="nav-link" to="/account">
+                        Account
+                    </NavLink>
                 </div>
             </nav>
         </div>
@@ -90,3 +82,32 @@ export default Navigation;
  const [display, setDisplay] = useState<String>("home")
  {changeDisplay(display)}
  */
+
+/**<NavLink className="navbar-brand" to="/">
+ Brown University
+ </NavLink>
+
+
+ <ul className="navbar-nav ml-auto">
+ <li className="nav-item">
+ <NavLink className="nav-link" to="/">
+ Home
+ <span className="sr-only">(current)</span>
+ </NavLink>
+ </li>
+ <li className="nav-item">
+ <NavLink className="nav-link" to="/calendar">
+ <span>Calendar</span>
+ </NavLink>
+ </li>
+ <li className="nav-item">
+ <NavLink className="nav-link" to="/campuslocations">
+ Campus Locations
+ </NavLink>
+ </li>
+ <li className="nav-item">
+ <NavLink className="nav-link" to="/account">
+ Account
+ </NavLink>
+ </li>
+ </ul>*/

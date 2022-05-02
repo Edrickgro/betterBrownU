@@ -1,4 +1,17 @@
 import React, {useState} from 'react';
+import {Simulate} from "react-dom/test-utils";
+
+type Location = {
+
+    name: string
+    search: string
+    coordinates: number[]
+    occupancy: number //TODO: change this
+    maxOccupancy: number
+    radius: number
+}
+
+const occupancyRatio = 0.5;
 
 function geoFindMe() {
 
@@ -63,14 +76,55 @@ function getDatabase(setDatabase: React.Dispatch<React.SetStateAction<string[][]
         .catch((error: any) => console.error("ERROR:", error))
 }
 
+
+
+
+
+function isInRadius(radius: number, coords1: number[], coords2: number[]) {
+
+    let x1 = coords1[0];
+    let y1 = coords1[1];
+    let x2 = coords2[0];
+    let y2 = coords2[1];
+
+    let distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+
+    return (distance <= radius);
+}
+
+function iterateDatabase(database: Location[], userCoords: number[]) {
+
+    for (let location of database) {
+
+        if (isInRadius(location.radius, location.coordinates, userCoords)) {
+            //TODO: increment location occupancy by one
+        }
+    }
+
+}
+
+function business(location: Location) {
+
+    if (location.occupancy <= location.maxOccupancy*occupancyRatio) {
+        return "not busy"
+    } else {
+        return "busy"
+    }
+}
+
 function Geolocator() {
 
-    const [geolocatorDatabase, setGeolocatorDatabase] = useState<string[][] | null>([
-        ["Josiah's", "Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", "busy"],
-        ["Sharpe Refractory", "Sharpe Refractory, Ratty","a little busy"],
-        ["Sciences Library", "Sciences Library, SciLi, Sci-Li", "not busy"],
-        ["Barus and Holly", "Barus and Holly, Engineering Building, Engineering Lab","busy"],
-    ])
+    var location1: Location = { name:"Josiah's", search:"Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", occupancy: 1, coordinates:[0,0], maxOccupancy:100, radius:0}
+    var location2: Location = { name:"Sharpe Refectory", search:"Sharpe Refractory, Sharpe Refectory, Ratty", occupancy:90, coordinates:[0,0], maxOccupancy:100, radius:0}
+    var location3: Location = { name:"Science Library", search:"Sciences Library, SciLi, Sci-Li", occupancy:100, coordinates:[0,0], maxOccupancy:100, radius:0}
+    var location4: Location = { name:"Barus and Holly", search:"Barus and Holly, Engineering Building, Engineering Lab", occupancy:0, coordinates:[0,0], maxOccupancy:100, radius:0}
+
+    /**["Josiah's", "Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", "busy"],
+     ["Sharpe Refectory", "Sharpe Refractory, Sharpe Refectory, Ratty", "a little busy"],
+     ["Sciences Library", "Sciences Library, SciLi, Sci-Li", "not busy"],
+     ["Barus and Holly", "Barus and Holly, Engineering Building, Engineering Lab","busy"],*/
+
+    const [database, setDatabase] = useState<Location[] | null>([location1, location2, location3, location4])
 
     //getDatabase(setGeolocatorDatabase)
 
@@ -84,14 +138,14 @@ function Geolocator() {
             <div>Search a location:</div>
             <input placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displayTable()}/>
 
-            <table className="center">
+            <table>
                 <thead id="header"></thead>
                 <tbody id="body">
-                {geolocatorDatabase?.map(
+                {database?.map(
                     item =>
-                        <tr className="table-row" id={item[1]}>
-                            <td className="table-location">{item[0]}</td>
-                            <td className={"table-" + item[2]}>{item[2]}</td>
+                        <tr className="table-row" id={item.search}>
+                            <td className="table-location">{item.name}</td>
+                            <td className={"table-" + business(item)}>{business(item)}</td>
                         </tr>)}
                 </tbody>
             </table>
