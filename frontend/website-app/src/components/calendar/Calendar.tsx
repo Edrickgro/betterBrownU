@@ -1,5 +1,7 @@
 import React, {useState} from 'react'
 import Date from "./Date"
+import EventAdder from "./EventAdder"
+import {getAllDates, writeNewEvent} from "./CalendarFB";
 
 //TODO is there a way to have this be a global type so I don't have to reimport
 type event = {
@@ -31,48 +33,48 @@ function Calendar () {
     }
 
     function getCalendarInfo() : dateInfo[]{
-        let event1 =  {
-            eventName: "sport1",
-            startTime: "8:00am",
-            endTime: "10:00am",
-            info: "it's behind the OMAC"
-        }
-        let event2 = {
-            eventName: "sport2",
-            startTime: "5:00pm",
-            endTime: "7:30pm",
-            info: "brown school spirit rah rah"
-        }
-        let event3 = {
-            eventName: "acapella",
-            startTime: "9:00pm",
-            endTime: "11:00pm",
-            info: "we have so many acapella troupes at this school"
-        }
-        let event4 = {
-            eventName: "concert",
-            startTime: "3:00pm",
-            endTime: "7:00pm",
-            info: "I feel like we have more theaters than we use"
-        }
-        let event5 = {
-            eventName: "Bill Clinton Speaking??",
-            startTime: "5pm",
-            endTime: "6pm",
-            info: "located somewhere in watson"
-        }
-
-        let eventList1 : event[] = [event1, event2]
-        let eventList2 : event[] = [event3, event4]
-        let eventList3 : event[] = [event5]
-
-        let date1 : dateInfo = {date: "10/31/2001", events: eventList1}
-        let date2 : dateInfo = {date: "2/13/2002", events: eventList2}
-        let date3 : dateInfo = {date: "6/14/2002", events: eventList3}
-
-        let fakeDatesArr : dateInfo[] = [date1, date2, date3];
-
-        return fakeDatesArr;
+        // let event1 =  {
+        //     eventName: "sport1",
+        //     startTime: "8:00am",
+        //     endTime: "10:00am",
+        //     info: "it's behind the OMAC"
+        // }
+        // let event2 = {
+        //     eventName: "sport2",
+        //     startTime: "5:00pm",
+        //     endTime: "7:30pm",
+        //     info: "brown school spirit rah rah"
+        // }
+        // let event3 = {
+        //     eventName: "acapella",
+        //     startTime: "9:00pm",
+        //     endTime: "11:00pm",
+        //     info: "we have so many acapella troupes at this school"
+        // }
+        // let event4 = {
+        //     eventName: "concert",
+        //     startTime: "3:00pm",
+        //     endTime: "7:00pm",
+        //     info: "I feel like we have more theaters than we use"
+        // }
+        // let event5 = {
+        //     eventName: "Bill Clinton Speaking??",
+        //     startTime: "5pm",
+        //     endTime: "6pm",
+        //     info: "located somewhere in watson"
+        // }
+        //
+        // let eventList1 : event[] = [event1, event2]
+        // let eventList2 : event[] = [event3, event4]
+        // let eventList3 : event[] = [event5]
+        //
+        // let date1 : dateInfo = {date: "10/31/2001", events: eventList1}
+        // let date2 : dateInfo = {date: "2/13/2002", events: eventList2}
+        // let date3 : dateInfo = {date: "6/14/2002", events: eventList3}
+        //
+        // let fakeDatesArr : dateInfo[] = [date1, date2, date3];
+        let dateInfoList : dateInfo[] = getAllDates()
+        return dateInfoList;
     }
 
     /**
@@ -91,9 +93,10 @@ function Calendar () {
     }
 
     return (
-        <div className="menu-item">
+        <div className="menu-item calendar">
             <h3>Calendar</h3>
-            <button onClick={load_data}>Click to load!</button>
+            <EventAdder/>
+            <button onClick={load_data}>Click to (re)load!</button>
             <div id={"date-list"}>
                 {generateDates()}
             </div>
