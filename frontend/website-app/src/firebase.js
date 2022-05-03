@@ -38,6 +38,11 @@ export const signInWithGoogle = () => {
 
 export const signOutofAccount = () => {
     signOut(auth, provider).then(() => {
+        // @ts-ignore
+        const name = provider.displayName;
+        const email = null;
+        localStorage.setItem("name", name);
+        localStorage.setItem("email", email);
         console.log("signed out")
     });
 }
