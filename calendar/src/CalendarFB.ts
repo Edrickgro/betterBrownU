@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
+import { Console } from "console";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue} from 'firebase/database';
+
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -34,6 +36,20 @@ type event = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase();
 
+function nextValidID(date: string) : number { 
+  const dateRef = ref(db, 'Dates/' + date);
+  let numChildren : number = 0;
+  onValue(dateRef, (dateSnapshot) => { 
+    // if the date does exist, id is number of children
+    if (dateSnapshot.exists()) { 
+      dateSnapshot.forEach((eventSnapshot) => { 
+        numChildren++
+      })
+    }
+  })
+  return numChildren
+}
+
 /**
  * Put an event into the database 
  * 
@@ -45,14 +61,15 @@ const db = getDatabase();
  * @param date 
  * @param eventID 
  */
-function writeEvent(eventName : string, startTime : string, endTime : string, info: string, date: string, eventID: string) : void{ 
-  const reference = ref(db, 'Dates/' + date + '/' + eventID);
+function writeNewEvent(event: event, date: string) : void{ 
+  const validID = nextValidID(date)
+  const reference = ref(db, 'Dates/' + date + '/' + validID);
 
   set(reference, {
-    eventName: eventName,
-    startTime: startTime,
-    endTime: endTime,
-    info: info
+    eventName: event.eventName,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    info: event.info
   })
 }
 
@@ -80,21 +97,47 @@ function getDateEvents(date : string) : event[] {
  */
 function getAllDates() : dateInfo[] { 
   const datesRef = ref(db, 'Dates/')
+  const swRef = ref(db, datesRef.key + "/" + "2022-04-29")
+  const badRef = ref(db, datesRef.key + "/" + "bad_ref")
+  // TODO: child() doesn't work? shitty workaround
   let retDates : dateInfo[] = []
   // get all dates that have been added
-  onValue(datesRef, (snapshot) => {
+
+  //TODO: figure out how to loop through the fucking keys
+  // snapshot is of Dates
+  onValue(datesRef, (dirSnapshot) => {
+    console.log("Onvalue was called " + dirSnapshot.key)
     // iterate and add each to return list
-    snapshot.forEach((childSnapshot) => {
+    //iterating through dates
+    dirSnapshot.forEach((dateSnapshot) => {
       //TODO: could be an error depending on how date directories work "'/' creates an additional layer"
-      const currEvent = childSnapshot.val();
-      retDates.push(currEvent.val);
+      // console.log("child of child" + dateSnapshot.key) // TODO: 
+      // add each event to date's event list
+      let dateEvents : event[] = [];
+      dateSnapshot.forEach((eventSnapshot) => {
+        console.log("event val: " + eventSnapshot.val())
+        const currEvent = eventSnapshot.val();
+        const newEvent = <event>({
+          startTime: currEvent.startTime,
+          endTime: currEvent.endTime,
+          eventName: currEvent.eventName,
+          info: currEvent.info
+        });
+        dateEvents.push(newEvent)
+      })
+      // create date, add eventList to it, add to dateList
+      const newDate =  <dateInfo>({
+        date: dateSnapshot.key,
+        events: dateEvents
+      })
+      retDates.push(newDate)
     })  
   });
   return retDates
 }
 
-writeEvent("Spring Weekend", "18:30", "22:30", "Annual thing", "2022-04-29", "0");
-writeEvent("lunch", "12:00", "13:00", "food optional", "2022-04-29", "1");
+// writeEvent("Spring Weekend", "18:30", "22:30", "Annual thing", "2022-04-29", "0");
+// writeEvent("lunch", "12:00", "13:00", "food optional", "2022-04-29", "1");
 
 // TODO: figure out what to export
-export {}
+export {getAllDates, writeNewEvent}
