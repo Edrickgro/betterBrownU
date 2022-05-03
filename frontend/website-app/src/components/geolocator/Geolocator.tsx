@@ -1,19 +1,19 @@
 import React, {useState} from 'react';
-import {Simulate} from "react-dom/test-utils";
 
-type Location = {
+interface Location {
 
-    name: string
-    search: string
-    coordinates: number[]
-    occupancy: number //TODO: change this
-    maxOccupancy: number
-    radius: number
+    Name: string
+    Search: string
+    Longitude: number
+    Latitude: number
+    Occupancy: number
+    Max: number
+    Radius: number
 }
 
-const occupancyRatio = 0.5;
+const occupancyRatio = [0.33, 0.66];
 
-function geoFindMe() {
+function geoFindMe(setUserCoords: React.Dispatch<React.SetStateAction<number[] | null>>) {
 
     const status: HTMLElement | null = document.getElementById("status")
     const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
@@ -24,6 +24,7 @@ function geoFindMe() {
     function success(position: any) {
         const latitude  = position.coords.latitude;
         const longitude = position.coords.longitude;
+        setUserCoords([longitude, latitude])
 
         status!.textContent = '';
         mapLink!.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
@@ -59,65 +60,71 @@ function displayTable() {
             row.style.display = ""
         }
     })
-
 }
 
-function getDatabase(setDatabase: React.Dispatch<React.SetStateAction<string[][] | null>>) {
-    fetch("http://localhost:4567/table", {
-        method: 'GET',
-        headers: {
-            "Access-Control-Allow-Origin": "*"
-        }
-    })
-        .then((response: Response) => response.json())
-        .then((db: string[][]) => {
-            setDatabase(db)
-        })
-        .catch((error: any) => console.error("ERROR:", error))
-}
+function checkUserCoords(database: Location[] | null,
+                         userCoords: number[] | null,
+                         userLocation: Location | null,
+                         setUserLocation: React.Dispatch<React.SetStateAction<Location | null>>) {
 
+    if (!database || !userCoords) {return;}
+    let isInSomeLocation: boolean = false
 
+    function isInRadius(radius: number, x1: number, y1: number, x2: number, y2: number) {
 
+        let distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 
-
-function isInRadius(radius: number, coords1: number[], coords2: number[]) {
-
-    let x1 = coords1[0];
-    let y1 = coords1[1];
-    let x2 = coords2[0];
-    let y2 = coords2[1];
-
-    let distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-
-    return (distance <= radius);
-}
-
-function iterateDatabase(database: Location[], userCoords: number[]) {
+        return (distance <= radius);
+    }
 
     for (let location of database) {
 
-        if (isInRadius(location.radius, location.coordinates, userCoords)) {
-            //TODO: increment location occupancy by one
+        if (isInRadius(location.Radius, location.Longitude, location.Latitude, userCoords[0], userCoords[1])) {
+            isInSomeLocation = true
+
+            // If user was not in a campus location before
+            if (!userLocation) {
+                // TODO: increment location occupancy by one
+                // TODO: update database and database state
+                return;
+            }
+
+            // If user is in the same campus location as before
+            if (location.Name === userLocation.Name) {return;}
+
+            // If user moved from one campus location to another
+            // TODO: subtract location occupancy by one
+            setUserLocation(location)
         }
     }
 
+    // If user was in a campus location but not any more
+    if (!isInSomeLocation && userLocation) {
+        // TODO: subtract location occupancy by one
+        setUserLocation(null);
+    }
 }
 
 function business(location: Location) {
 
-    if (location.occupancy <= location.maxOccupancy*occupancyRatio) {
-        return "not busy"
+    const maxArray = occupancyRatio.map(x => x*location.Max)
+    const occupancy = location.Occupancy
+
+    if (occupancy <= maxArray[0]) {
+        return "not busy";
+    } else if (occupancy <= maxArray[1]) {
+        return "a little busy";
     } else {
-        return "busy"
+        return "busy";
     }
 }
 
 function Geolocator() {
 
-    var location1: Location = { name:"Josiah's", search:"Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", occupancy: 1, coordinates:[0,0], maxOccupancy:100, radius:0}
-    var location2: Location = { name:"Sharpe Refectory", search:"Sharpe Refractory, Sharpe Refectory, Ratty", occupancy:90, coordinates:[0,0], maxOccupancy:100, radius:0}
-    var location3: Location = { name:"Science Library", search:"Sciences Library, SciLi, Sci-Li", occupancy:100, coordinates:[0,0], maxOccupancy:100, radius:0}
-    var location4: Location = { name:"Barus and Holly", search:"Barus and Holly, Engineering Building, Engineering Lab", occupancy:0, coordinates:[0,0], maxOccupancy:100, radius:0}
+    var location1: Location = { Name:"Josiah's", Search:"Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", Occupancy: 1, Longitude: 0, Latitude: 0, Max:100, Radius:0}
+    var location2: Location = { Name:"Sharpe Refectory", Search:"Sharpe Refractory, Sharpe Refectory, Ratty", Occupancy:90, Longitude: 0, Latitude: 0,Max:100, Radius:0}
+    var location3: Location = { Name:"Science Library", Search:"Sciences Library, SciLi, Sci-Li", Occupancy:100, Longitude: 0, Latitude: 0,Max: 100, Radius:0}
+    var location4: Location = { Name:"Barus and Holly", Search:"Barus and Holly, Engineering Building, Engineering Lab", Occupancy:50, Longitude: 0, Latitude: 0,Max:100, Radius:0}
 
     /**["Josiah's", "Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", "busy"],
      ["Sharpe Refectory", "Sharpe Refractory, Sharpe Refectory, Ratty", "a little busy"],
@@ -125,13 +132,17 @@ function Geolocator() {
      ["Barus and Holly", "Barus and Holly, Engineering Building, Engineering Lab","busy"],*/
 
     const [database, setDatabase] = useState<Location[] | null>([location1, location2, location3, location4])
+    const [userCoords, setUserCoords] = useState<number[] | null>(null)
+    const [userLocation, setUserLocation] = useState<Location | null>(null)
 
-    //getDatabase(setGeolocatorDatabase)
+    // TODO: set database state
+    //geoFindMe(setUserCoords)
+    //checkUserCoords(database, userCoords, userLocation, setUserLocation)
 
     return (
         <div id="geolocator" className="menu-item">
-            <h3>Geolocator</h3>
-            <button id="geolocatorButton" onClick={() => geoFindMe()}>Find my location</button>
+            <h3>Campus Locations</h3>
+            <button id="geolocatorButton" onClick={() => geoFindMe(setUserCoords)}>Find my location</button>
             <p id = "status"></p>
             <a id = "map-link" target="_blank"></a>
 
@@ -139,12 +150,12 @@ function Geolocator() {
             <input placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displayTable()}/>
 
             <table>
-                <thead id="header"></thead>
-                <tbody id="body">
+                <thead className="table-header"></thead>
+                <tbody className="table-body">
                 {database?.map(
                     item =>
-                        <tr className="table-row" id={item.search}>
-                            <td className="table-location">{item.name}</td>
+                        <tr className="table-row" id={item.Search}>
+                            <td className="table-location">{item.Name}</td>
                             <td className={"table-" + business(item)}>{business(item)}</td>
                         </tr>)}
                 </tbody>
@@ -160,4 +171,18 @@ export default Geolocator;
                 <div className="geolocator-location" id={item[1]}>
                 {item[0] + ": " + item[2]}
                 </div>)}
+
+ function getDatabase(setDatabase: React.Dispatch<React.SetStateAction<string[][] | null>>) {
+    fetch("http://localhost:4567/table", {
+        method: 'GET',
+        headers: {
+            "Access-Control-Allow-Origin": "*"
+        }
+    })
+        .then((response: Response) => response.json())
+        .then((db: string[][]) => {
+            setDatabase(db)
+        })
+        .catch((error: any) => console.error("ERROR:", error))
+}
  */
