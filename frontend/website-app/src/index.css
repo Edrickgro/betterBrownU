@@ -138,3 +138,9 @@ table td {
   margin-left: 30px;
   margin-top: 20px;
 }
+
+/* event adders that are children of calendar divs*/
+.event-adder {
+  display: block;
+  flex-wrap: wrap;
+}

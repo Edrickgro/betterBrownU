@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import Date from "./Date"
+import EventAdder from "./EventAdder"
 import {getAllDates, writeNewEvent} from "./CalendarFB";
 
 //TODO is there a way to have this be a global type so I don't have to reimport
@@ -92,9 +93,10 @@ function Calendar () {
     }
 
     return (
-        <div className="menu-item">
+        <div className="menu-item calendar">
             <h3>Calendar</h3>
-            <button onClick={load_data}>Click to load!</button>
+            <EventAdder/>
+            <button onClick={load_data}>Click to (re)load!</button>
             <div id={"date-list"}>
                 {generateDates()}
             </div>
