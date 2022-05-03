@@ -4,6 +4,7 @@ import Event from "./Event";
 import {writeNewEvent} from "./CalendarFB";
 
 function EventAdder() {
+    const [showForm, setShowForm] = useState(false);
     const [dateName, setDate] = useState("");
     const [newEventName, setEventName] = useState("");
     const [newEventStart, setEventStart] = useState("");
@@ -25,14 +26,15 @@ function EventAdder() {
     }
 
     return  <div className={"event-adder"}>
-                <button onClick={sendEventToBackend}>Add Event!</button>
-                <div id={"event-adder-form"}>
-                    <AdderInput label={"Date (yyyy-mm-dd):"} change={setDate}/>
-                    <AdderInput label={"Event Name:"} change={setEventName}/>
-                    <AdderInput label={"Start Time:"} change={setEventStart}/>
-                    <AdderInput label={"End Time:"} change={setEventEnd}/>
-                    <AdderInput label={"Extra Info/Description:"} change={setEventInfo}/>
-                </div>
+                <button onClick={()=>setShowForm(!showForm)}>Show adder menu</button>
+        {showForm ? <div id={"event-adder-form"}>
+            <button onClick={sendEventToBackend}>Add Event!</button>
+            <AdderInput label={"Date (yyyy-mm-dd):"} change={setDate}/>
+            <AdderInput label={"Event Name:"} change={setEventName}/>
+            <AdderInput label={"Start Time:"} change={setEventStart}/>
+            <AdderInput label={"End Time:"} change={setEventEnd}/>
+            <AdderInput label={"Extra Info/Description:"} change={setEventInfo}/>
+        </div> : null}
             </div>
 }
 
