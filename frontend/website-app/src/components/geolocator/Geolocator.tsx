@@ -1,4 +1,6 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
+import { initializeApp } from 'firebase/app';
+import {getDatabase, onValue, ref, set, push, get, child, onChildChanged, update, runTransaction} from "firebase/database";
 
 interface Location {
 
@@ -10,6 +12,96 @@ interface Location {
     Max: number
     Radius: number
 }
+
+const firebaseApp = initializeApp({
+    apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
+    authDomain: "cs32termproject.firebaseapp.com",
+    projectId: "cs32termproject",
+    storageBucket: "cs32termproject.appspot.com",
+    messagingSenderId: "586091400920",
+    appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
+    measurementId: "G-VP24Q6Q0E3"
+
+});
+
+const db = getDatabase();
+
+function getOccupancy(ID: string){
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, 'Locations/' + ID + '/Occupancy')).then((snapshot) =>{
+        console.log(snapshot.val());
+    });
+}
+
+function decrement(ID: string){
+    const db = getDatabase();
+    const distanceRef = ref(db, 'Locations/' + ID);
+
+    runTransaction(distanceRef, (post) => {
+        if(post.Occupancy === 0){
+            return post;
+        }
+        post.Occupancy--;
+
+        return post
+    });
+
+
+
+}
+
+function increment(ID: string){
+    const db = getDatabase();
+    const distanceRef = ref(db, 'Locations/' + ID);
+
+    runTransaction(distanceRef, (post) => {
+        if(post.Occupancy === 0){
+            return post;
+        }
+        post.Occupancy++;
+
+        return post
+    });
+
+
+
+}
+
+function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[] | null>>) {
+    const db = getDatabase();
+    const distanceRef = ref(db, 'Locations/');
+    //no iteration method
+    /**
+     let data;
+     onValue(distanceRef, (snapshot) =>{
+        data = snapshot.val();
+    });
+     return data;
+     **/
+
+        //iteration method (Location interface)
+
+
+    let list: Location[] = [];
+    onValue(distanceRef, (snapshot) =>{
+        let json = snapshot.val();
+        for(let i in json){
+            let jsonObject: Location = JSON.parse(JSON.stringify(json[i]));
+            list.push(jsonObject);
+        }
+    });
+
+    console.log("error check")
+    //return list;
+    setDatabase(list)
+}
+
+
+
+
+
+
+
 
 const occupancyRatio = [0.33, 0.66];
 
@@ -70,7 +162,7 @@ function checkUserCoords(database: Location[] | null,
     if (!database || !userCoords) {return;}
     let isInSomeLocation: boolean = false
 
-    function isInRadius(radius: number, x1: number, y1: number, x2: number, y2: number) {
+    function isInRadius(radius: number, x1: number, y1: number, x2: number, y2: number): boolean {
 
         let distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 
@@ -105,7 +197,7 @@ function checkUserCoords(database: Location[] | null,
     }
 }
 
-function business(location: Location) {
+function business(location: Location): string {
 
     const maxArray = occupancyRatio.map(x => x*location.Max)
     const occupancy = location.Occupancy
@@ -131,18 +223,20 @@ function Geolocator() {
      ["Sciences Library", "Sciences Library, SciLi, Sci-Li", "not busy"],
      ["Barus and Holly", "Barus and Holly, Engineering Building, Engineering Lab","busy"],*/
 
-    const [database, setDatabase] = useState<Location[] | null>([location1, location2, location3, location4])
+    const [database, setDatabase] = useState<Location[] | null>(null)
     const [userCoords, setUserCoords] = useState<number[] | null>(null)
     const [userLocation, setUserLocation] = useState<Location | null>(null)
 
     // TODO: set database state
+    //getJsonList(setDatabase)
+
     //geoFindMe(setUserCoords)
     //checkUserCoords(database, userCoords, userLocation, setUserLocation)
 
     return (
         <div id="geolocator" className="menu-item">
             <h3>Campus Locations</h3>
-            <button id="geolocatorButton" onClick={() => geoFindMe(setUserCoords)}>Find my location</button>
+            <button onClick={() => getJsonList(setDatabase)}>Click to load!</button>
             <p id = "status"></p>
             <a id = "map-link" target="_blank"></a>
 
@@ -167,6 +261,9 @@ function Geolocator() {
 export default Geolocator;
 
 /**
+ * <button id="geolocatorButton" onClick={() => geoFindMe(setUserCoords)}>Find my location</button>
+ *
+ *
  {geolocatorDatabase?.map(item =>
                 <div className="geolocator-location" id={item[1]}>
                 {item[0] + ": " + item[2]}
