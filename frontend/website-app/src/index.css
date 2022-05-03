@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  /*text-align: center;*/
 }
 
 code {
@@ -13,13 +13,16 @@ code {
     monospace;
 }
 
+/* navigation bar */
 .brown-logo-img {
-  max-width: 40%;
+  max-width: 30%;
   float: left;
+  margin-top: 5px;
 }
 
 .navigation {
   background-color: #381C00;
+  height: 100px;
 }
 
 .navbar-brand {
@@ -27,60 +30,60 @@ code {
   color: white;
 }
 
-.navigation ul {
-  display: block;
-  list-style-type: none;
-  padding: 0;
-  text-align: left;
+.navbar-items {
+  margin-top: 25px;
+  display: inline-block;
 }
 
-.navigation li {
-  display: block;
-  flex-grow: 1;
-}
+.nav-link {
+  font-family: "CircularStd",sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.0625rem;
+  text-transform: uppercase;
 
-.navigation nav-link {
-}
-
-.navigation a {
-  display: block;
-  text-decoration: none;
-  color: white;
-}
-
-.navigation a:hover {
-  text-decoration: none;
-  color: #E4002B;
-}
-
-
-.navigation a span {
-  cursor: pointer;
   display: inline-block;
   position: relative;
-  transition: 0.5s;
+  text-decoration: none;
+  color: white;
+
+  background-image: linear-gradient(
+          to right,
+          #E4002B,
+          #E4002B 50%,
+          white 50%
+  );
+  background-size: 200% 100%;
+  background-position: -100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: all 0.3s ease-in-out;
 }
 
-.navigation a span:after {
-  content: '\00bb'; /*'\27AB'; /*'\2192'; */
+.nav-link:hover {
+  text-decoration: none;
+  color: #E4002B;
+  background-position: 0;
+}
+
+.nav-link:after {
+  content: '';
   position: absolute;
-  opacity: 0;
-  top: 0;
-  right: -20px;
-  transition: 0.5s;
+  width: 60%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 5px;
+  left: 20%;
+  background-color: #E4002B;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
 }
 
-.navigation a:hover span {
-  padding-right: 25px;
+.nav-link:hover:after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
 }
 
-
-
-
-
-
-
-
+/* calendar */
 .event-item {
   background-color: aliceblue;
   width: 20%;
@@ -99,4 +102,39 @@ code {
   padding-top: 2%;
   display: flex;
   flex-wrap: wrap;
+}
+
+/* geolocator table */
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table td {
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 45%;
+}
+
+.table-location {
+  font-weight: 700;
+}
+
+.table-busy {
+  color: red;
+}
+
+.table-not {
+  color: green;
+}
+
+.table-a {
+  color: gold;
+}
+
+
+/* menu items */
+.menu-item {
+  margin-left: 30px;
+  margin-top: 20px;
 }

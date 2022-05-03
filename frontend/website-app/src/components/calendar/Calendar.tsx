@@ -91,7 +91,7 @@ function Calendar () {
     }
 
     return (
-        <div className={"calendar"}>
+        <div className="menu-item">
             <h3>Calendar</h3>
             <button onClick={load_data}>Click to load!</button>
             <div id={"date-list"}>
