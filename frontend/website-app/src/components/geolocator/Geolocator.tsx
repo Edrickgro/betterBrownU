@@ -127,14 +127,19 @@ function geoFindMe(database: Location[] | null) {
     const status: HTMLElement | null = document.getElementById("status")
     //const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
     const mapLink: HTMLIFrameElement | null = document.getElementById("openstreetmap") as HTMLIFrameElement;
+    const options = {
+        enableHighAccuracy: true
+    };
 
     //mapLink!.href = '';
     //mapLink!.textContent = '';
 
     function success(position: any) {
+        console.log("ERROR CHECK: GETTING LOCATION")
         const latitude  = position.coords.latitude;
         const longitude = position.coords.longitude;
 
+        console.log("ERROR CHECK: COORDS ARE... lat: " + latitude + " long: " + longitude)
         checkUserCoords(database, [longitude, latitude])
 
         status!.textContent = '';
@@ -159,7 +164,7 @@ function geoFindMe(database: Location[] | null) {
         status!.textContent = 'Geolocation is not supported by your browser';
     } else {
         status!.textContent = 'Locating…';
-        navigator.geolocation.getCurrentPosition(success, error);
+        navigator.geolocation.getCurrentPosition(success, error, options);
     }
 
 }
@@ -292,7 +297,7 @@ function displayTable(database: Location[]) {
         bodyHTML += `<tr class="table-row" id=${"\"" + item.Search + "\""}>`;
         bodyHTML += `<td class="table-location">${item.Name}</td>`;
         bodyHTML += `<td class=${"table-" + findBusiness(item)}>${findBusiness(item)}</td>`;
-        bodyHTML += `<td>${item.Occupancy}</td>`;
+        //bodyHTML += `<td>${item.Occupancy}</td>`;
         bodyHTML += `</tr>`;
     }
 
@@ -319,6 +324,7 @@ function Geolocator() {
     useEffect(() => {
         console.log("ERROR CHECK: useEffect 1")
         getJsonList(setDatabase)
+        setInterval(() => geoFindMe(database), 600000) // 10 minutes
     }, []);
 
     /*
@@ -357,14 +363,14 @@ function Geolocator() {
                     </div>
 
                     <table>
-                        <thead className="table-header"></thead>
+                        <thead className="table-header" id="geolocator-table-header"></thead>
                         <tbody id="geolocator-table-body" className="table-body">
                             {database?.map(
                                 item =>
-                                    <tr className="table-row" id={item.Search}>
-                                        <td className="table-location">{item.Name}</td>
-                                        <td className={"table-" + findBusiness(item)}>{findBusiness(item)}</td>
-                                        <td>{item.Occupancy}</td>
+                                    <tr className="table-row" id={"table-row-" + item.Search}>
+                                        <td className="table-location" id={"table-name-" + item.Name}>{item.Name}</td>
+                                        <td className={"table-" + findBusiness(item)} id={"table-business-" + item.Name}>{findBusiness(item)}</td>
+                                        <td id={"table-occupancy-" + item.Name}>{item.Occupancy}</td>
                                     </tr>)}
                         </tbody>
                     </table>
