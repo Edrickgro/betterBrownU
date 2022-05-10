@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import {getDatabase, onValue, ref, set, push, get, child, onChildChanged, update, runTransaction} from "firebase/database";
 
+// Location interface used to represent campus locations
 interface Location {
 
     Name: string
@@ -13,6 +14,16 @@ interface Location {
     Radius: number
 }
 
+// User's campus location
+let userLocation: Location | null = null;
+
+// User's coordinates, cannot be accessed by developers
+let userCoords: number[] | null = null;
+
+// Ratio used to determine how busy a campus location is
+const occupancyRatio = [0.33, 0.66];
+
+// Initialize Firebase app
 const firebaseApp = initializeApp({
     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
     authDomain: "cs32termproject.firebaseapp.com",
@@ -24,8 +35,10 @@ const firebaseApp = initializeApp({
 
 });
 
+// Connect to Firebase database
 const db = getDatabase();
 
+// Returns the occupancy of a campus location
 function getOccupancy(ID: string){
     const dbRef = ref(getDatabase());
     get(child(dbRef, 'Locations/' + ID + '/Occupancy')).then((snapshot) =>{
@@ -33,6 +46,7 @@ function getOccupancy(ID: string){
     });
 }
 
+// Decrements the occupancy of a campus location by 1
 function decrement(ID: string){
     const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
@@ -45,82 +59,95 @@ function decrement(ID: string){
 
         return post
     });
-
-
-
 }
 
+// Increments the occupancy of a campus location by 1
 function increment(ID: string){
     const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
-        if(post.Occupancy === 0){
-            return post;
-        }
         post.Occupancy++;
-
         return post
     });
-
-
-
 }
 
-function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[] | null>>) {
+// Converts Firebase database into a list of Locations and returns that list
+function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]>>) {
+    //setDatabase: React.Dispatch<React.SetStateAction<Location[] | null>>
     const db = getDatabase();
+    const dbRef = ref(getDatabase());
     const distanceRef = ref(db, 'Locations/');
+    let isInitial = true;
+
     //no iteration method
     /**
-     let data;
+     * let data;
      onValue(distanceRef, (snapshot) =>{
         data = snapshot.val();
     });
      return data;
-     **/
+     */
 
-        //iteration method (Location interface)
-
-
-    let list: Location[] = [];
-    onValue(distanceRef, (snapshot) =>{
+    /*
+    get(child(dbRef, 'Locations/')).then((snapshot) =>{
+        console.log("ERROR CHECK: GET COMPLETE.");
+        let list: Location[] = [];
         let json = snapshot.val();
         for(let i in json){
             let jsonObject: Location = JSON.parse(JSON.stringify(json[i]));
             list.push(jsonObject);
         }
+        setDatabase(list)
     });
+    */
 
-    console.log("error check")
-    //return list;
-    setDatabase(list)
+    //iteration method (Location interface)
+    onValue(distanceRef, (snapshot) =>{
+        console.log("ERROR CHECK: ONVALUE COMPLETE.")
+        let list: Location[] = [];
+        let json = snapshot.val();
+        for(let i in json) {
+            let jsonObject: Location = JSON.parse(JSON.stringify(json[i]));
+            list.push(jsonObject);
+        }
+        setDatabase(list)
+
+        if (isInitial) {
+            console.log("ERROR CHECK: INITIAL GETJSON")
+            geoFindMe(list);
+            isInitial = false;
+        }
+    });
 }
 
-
-
-
-
-
-
-
-const occupancyRatio = [0.33, 0.66];
-
-function geoFindMe(setUserCoords: React.Dispatch<React.SetStateAction<number[] | null>>) {
+// Finds the exact coordinates of user
+function geoFindMe(database: Location[] | null) {
 
     const status: HTMLElement | null = document.getElementById("status")
-    const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
+    //const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
+    const mapLink: HTMLIFrameElement | null = document.getElementById("openstreetmap") as HTMLIFrameElement;
 
-    mapLink!.href = '';
-    mapLink!.textContent = '';
+    //mapLink!.href = '';
+    //mapLink!.textContent = '';
 
     function success(position: any) {
         const latitude  = position.coords.latitude;
         const longitude = position.coords.longitude;
-        setUserCoords([longitude, latitude])
 
-        status!.textContent = '';
-        mapLink!.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
-        mapLink!.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
+        checkUserCoords(database, [longitude, latitude])
+
+        //status!.textContent = '';
+        //mapLink!.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
+        //mapLink!.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
+
+        const longitudeTest = longitude - 0.00125588884355 + 0.00005;
+        const latitudeTest = latitude - 0.00078782516225 + 0.00005;
+
+        const latitude2 = latitudeTest + 0.00251054763794;
+        const longitude2 = longitudeTest + 0.00157298212822;
+
+        mapLink!.src = `https://www.openstreetmap.org/export/embed.html?bbox=${longitudeTest}%2C${latitudeTest}%2C${longitude2}%2C${latitude2}&amp;layer=mapnik`;
     }
 
     function error() {
@@ -137,13 +164,21 @@ function geoFindMe(setUserCoords: React.Dispatch<React.SetStateAction<number[] |
 
 }
 
-function displayTable() {
+// Displays appropriate entries in the campus locations table when the search
+// bar has an input.
+function displaySearch() {
 
+    // Get HTML element corresponding to the search bar
     const searchBar: HTMLInputElement | null = document.getElementById("geolocator-search-bar") as HTMLInputElement
+
+    // Get list of HTML elements corresponding to each row in the campus locations table
     const geolocatorList: HTMLElement[] | undefined[] = [].slice.call(document.getElementsByClassName("table-row"))
 
+    // Check if either searchBar or geolocatorList is undefined or null
     if (!searchBar || !geolocatorList) {return;}
 
+    // For each row, show or hide the row according to whether its search names
+    // are included in the search bar input.
     geolocatorList.map(row => {
         if (!row) {return;}
         if (!row.id.toLowerCase().includes(searchBar.value.toLowerCase())) {
@@ -154,50 +189,86 @@ function displayTable() {
     })
 }
 
-function checkUserCoords(database: Location[] | null,
-                         userCoords: number[] | null,
-                         userLocation: Location | null,
-                         setUserLocation: React.Dispatch<React.SetStateAction<Location | null>>) {
+// Determines if a user is in a campus location and modifies the occupancy of
+// the corresponding campus location accordingly.
+function checkUserCoords(database: Location[] | null, userCoords: number[] | null) {
 
+    // Check if database or userCoords is undefined or null
     if (!database || !userCoords) {return;}
+
+    // Boolean corresponding to if the user is in a campus location
     let isInSomeLocation: boolean = false
 
-    function isInRadius(radius: number, x1: number, y1: number, x2: number, y2: number): boolean {
+    // Helper method that converts degrees to radians
+    function toRadians(coord: number) {
 
-        let distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        return coord * Math.PI / 180;
+    }
 
+    // Finds the distance between two coordinates and determines if the user's
+    // coordinates in the location's predetermined radius.
+    // Some code used from:
+    // https://www.geeksforgeeks.org/program-distance-two-points-earth/
+    function isInRadius(radius: number, lon1: number, lat1: number, lon2: number, lat2: number): boolean {
+
+        // Convert coordinates to radians
+        lon1 =  toRadians(lon1);
+        lon2 = toRadians(lon2);
+        lat1 = toRadians(lat1);
+        lat2 = toRadians(lat2);
+
+        // Haversine formula
+        let dlon = lon2 - lon1;
+        let dlat = lat2 - lat1;
+        let a = Math.pow(Math.sin(dlat / 2), 2)
+            + Math.cos(lat1) * Math.cos(lat2)
+            * Math.pow(Math.sin(dlon / 2),2);
+        let c = 2 * Math.asin(Math.sqrt(a));
+
+        // Radius of earth in kilometers
+        let r = 6371;
+
+        // Calculate the result in feet
+        let distance = c * r * 3280.84
+
+        // Return a boolean according to if the distance is less than or equal
+        // to the given radius of a campus location
         return (distance <= radius);
     }
 
+    // For each campus location, determine if the user's coordinates are within
+    // a campus location
     for (let location of database) {
 
         if (isInRadius(location.Radius, location.Longitude, location.Latitude, userCoords[0], userCoords[1])) {
             isInSomeLocation = true
 
-            // If user was not in a campus location before
             if (!userLocation) {
-                // TODO: increment location occupancy by one
+                // If user was not in a campus location before
+                increment(location.Name)
+                console.log("ERROR CHECK: location is..." + location.Name)
                 // TODO: update database and database state
-                return;
+            } else if (location.Name !== userLocation.Name) {
+                // If user moved from one campus location to another
+                decrement(userLocation.Name)
+                increment(location.Name)
             }
 
-            // If user is in the same campus location as before
-            if (location.Name === userLocation.Name) {return;}
-
-            // If user moved from one campus location to another
-            // TODO: subtract location occupancy by one
-            setUserLocation(location)
+            // Set userLocation to the user's current location
+            userLocation = location
+            break;
         }
     }
 
     // If user was in a campus location but not any more
     if (!isInSomeLocation && userLocation) {
-        // TODO: subtract location occupancy by one
-        setUserLocation(null);
+        decrement(userLocation.Name)
+        userLocation = null
     }
 }
 
-function business(location: Location): string {
+// Determines how busy a campus location is
+function findBusiness(location: Location): string {
 
     const maxArray = occupancyRatio.map(x => x*location.Max)
     const occupancy = location.Occupancy
@@ -211,75 +282,115 @@ function business(location: Location): string {
     }
 }
 
+function displayTable(database: Location[]) {
+
+    const body: HTMLTableSectionElement = document.getElementById("geolocator-table-body") as HTMLTableSectionElement;
+    if (!body) {return;}
+    body.innerHTML = "";
+    let bodyHTML = "";
+    for (let item of database) {
+        bodyHTML += `<tr class="table-row" id=${"\"" + item.Search + "\""}>`;
+        bodyHTML += `<td class="table-location">${item.Name}</td>`;
+        bodyHTML += `<td class=${"table-" + findBusiness(item)}>${findBusiness(item)}</td>`;
+        bodyHTML += `<td>${item.Occupancy}</td>`;
+        bodyHTML += `</tr>`;
+    }
+
+    /**database.map(item => {
+        bodyHTML += '<tr className="table-row" id={item.Search}>'
+        bodyHTML += '<td className="table-location">{item.Name}</td>'
+        bodyHTML += '<td className={"table-" + findBusiness(item)}>{findBusiness(item)}</td>'
+        bodyHTML += '<td>{item.Occupancy}</td>'
+        bodyHTML += '</tr>'
+    })**/
+
+    body.innerHTML += bodyHTML;
+}
+
+// Main functional component of Geolocator.tsx.
+// Initiates the database state and returns the HTML code for the Campus
+// Locations page.
 function Geolocator() {
 
-    var location1: Location = { Name:"Josiah's", Search:"Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", Occupancy: 1, Longitude: 0, Latitude: 0, Max:100, Radius:0}
-    var location2: Location = { Name:"Sharpe Refectory", Search:"Sharpe Refractory, Sharpe Refectory, Ratty", Occupancy:90, Longitude: 0, Latitude: 0,Max:100, Radius:0}
-    var location3: Location = { Name:"Science Library", Search:"Sciences Library, SciLi, Sci-Li", Occupancy:100, Longitude: 0, Latitude: 0,Max: 100, Radius:0}
-    var location4: Location = { Name:"Barus and Holly", Search:"Barus and Holly, Engineering Building, Engineering Lab", Occupancy:50, Longitude: 0, Latitude: 0,Max:100, Radius:0}
+    console.log("ERROR CHECK: RENDER")
 
-    /**["Josiah's", "Josiah's, Josiahs, Jo's, Jos, Joe, Joes, Joe's, Joao", "busy"],
-     ["Sharpe Refectory", "Sharpe Refractory, Sharpe Refectory, Ratty", "a little busy"],
-     ["Sciences Library", "Sciences Library, SciLi, Sci-Li", "not busy"],
-     ["Barus and Holly", "Barus and Holly, Engineering Building, Engineering Lab","busy"],*/
+    const [database, setDatabase] = useState<Location[]>([])
 
-    const [database, setDatabase] = useState<Location[] | null>(null)
-    const [userCoords, setUserCoords] = useState<number[] | null>(null)
-    const [userLocation, setUserLocation] = useState<Location | null>(null)
+    useEffect(() => {
+        console.log("ERROR CHECK: useEffect 1")
+        getJsonList(setDatabase)
+    }, []);
 
-    // TODO: set database state
-    //getJsonList(setDatabase)
-
-    //geoFindMe(setUserCoords)
-    //checkUserCoords(database, userCoords, userLocation, setUserLocation)
+    /*
+    useEffect( () => {
+        console.log("ERROR CHECK: useEffect 2")
+        geoFindMe(database)
+        //displayTable(database)
+    }, [database])
+     */
 
     return (
-        <div id="geolocator" className="menu-item">
-            <h3>Campus Locations</h3>
-            <button onClick={() => getJsonList(setDatabase)}>Click to load!</button>
-            <p id = "status"></p>
-            <a id = "map-link" target="_blank"></a>
+        <main id="geolocatorMain">
+            <section className="glassGeolocatorTable">
+                <div id="geolocator" className="menu-item">
+                    <h3 className="geoInlineBlock1" id="geoCampusLoc">Campus Locations</h3>
+                    <button className="geoInlineBlock1" id="geolocator-load" onClick={() => {
+                        /*if (!database) {
+                            setDatabase(getJsonList())
+                        }
+                        geoFindMe()
+                        checkUserCoords(database)
+                        setDatabase(getJsonList())
+                        let button = document.getElementById("geolocator-button")
+                        if (button) {button.innerHTML = "Reload!"}
+                        //getJsonList(setDatabase)
+                        //{displayTable(database)}
+                        */
+                        geoFindMe(database)
+                        console.log("ERROR CHECK: refresh")
+                    }}>Click to Reload</button>
 
-            <div>Search a location:</div>
-            <input placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displayTable()}/>
+                    <div>
+                        <h6 className="geoInlineBlock2">Search a location:</h6>
+                        <input className="geoInlineBlock2" placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displaySearch()}/>
+                    </div>
 
-            <table>
-                <thead className="table-header"></thead>
-                <tbody className="table-body">
-                {database?.map(
-                    item =>
-                        <tr className="table-row" id={item.Search}>
-                            <td className="table-location">{item.Name}</td>
-                            <td className={"table-" + business(item)}>{business(item)}</td>
-                        </tr>)}
-                </tbody>
-            </table>
-        </div>
+                    <table>
+                        <thead className="table-header"></thead>
+                        <tbody id="geolocator-table-body" className="table-body">
+                            {database?.map(
+                                item =>
+                                    <tr className="table-row" id={item.Search}>
+                                        <td className="table-location">{item.Name}</td>
+                                        <td className={"table-" + findBusiness(item)}>{findBusiness(item)}</td>
+                                        <td>{item.Occupancy}</td>
+                                    </tr>)}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section className = "glassGeolocatorMap">
+                <iframe id = "openstreetmap" src=''></iframe>
+            </section>
+        </main>
     );
 }
 
 export default Geolocator;
 
 /**
- * <button id="geolocatorButton" onClick={() => geoFindMe(setUserCoords)}>Find my location</button>
+ * <p id = "status"></p>
+ <a id = "map-link" target="_blank"></a>
  *
  *
- {geolocatorDatabase?.map(item =>
-                <div className="geolocator-location" id={item[1]}>
-                {item[0] + ": " + item[2]}
-                </div>)}
+ <button onClick={() => increment("Andrews Commons")}>increment andrews</button>
 
- function getDatabase(setDatabase: React.Dispatch<React.SetStateAction<string[][] | null>>) {
-    fetch("http://localhost:4567/table", {
-        method: 'GET',
-        headers: {
-            "Access-Control-Allow-Origin": "*"
-        }
-    })
-        .then((response: Response) => response.json())
-        .then((db: string[][]) => {
-            setDatabase(db)
-        })
-        .catch((error: any) => console.error("ERROR:", error))
-}
+ {database?.map(
+                        item =>
+                            <tr className="table-row" id={item.Search}>
+                                <td className="table-location">{item.Name}</td>
+                                <td className={"table-" + findBusiness(item)}>{findBusiness(item)}</td>
+                                <td>{item.Occupancy}</td>
+                            </tr>)}
  */
