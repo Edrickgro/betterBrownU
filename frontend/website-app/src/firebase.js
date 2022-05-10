@@ -24,11 +24,15 @@ const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
+export let signedIn = false;
 
 export const signInWithGoogle = () => {
     signInWithPopup(auth, provider).then((result) => {
         const name = result.user.displayName;
         const email = result.user.email;
+        signedIn = true;
+
+        console.log(result);
         localStorage.setItem("name", name);
         localStorage.setItem("email", email);
     }).catch((error) => {

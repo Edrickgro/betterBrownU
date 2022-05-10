@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
+import {signedIn, signInWithGoogle} from "../../firebase";
 
 function geoFindMe() {
+    if(signedIn) {
 
     const status: HTMLElement | null = document.getElementById("status")
     const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
@@ -8,7 +10,8 @@ function geoFindMe() {
     mapLink!.href = '';
     mapLink!.textContent = '';
 
-    function success(position: any) {
+    // @ts-ignore
+        function success(position: any) {
         const latitude  = position.coords.latitude;
         const longitude = position.coords.longitude;
 
@@ -17,7 +20,8 @@ function geoFindMe() {
         mapLink!.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
     }
 
-    function error() {
+    // @ts-ignore
+        function error() {
         status!.textContent = 'Unable to retrieve your location';
     }
 
@@ -27,6 +31,9 @@ function geoFindMe() {
     } else {
         status!.textContent = 'Locating…';
         navigator.geolocation.getCurrentPosition(success, error);
+    }
+    } else {
+        signInWithGoogle();
     }
 
 }
