@@ -137,7 +137,7 @@ function geoFindMe(database: Location[] | null) {
 
         checkUserCoords(database, [longitude, latitude])
 
-        //status!.textContent = '';
+        status!.textContent = '';
         //mapLink!.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
         //mapLink!.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
 
@@ -349,6 +349,7 @@ function Geolocator() {
                         geoFindMe(database)
                         console.log("ERROR CHECK: refresh")
                     }}>Click to Reload</button>
+                    <p id = "status"></p>
 
                     <div>
                         <h6 className="geoInlineBlock2">Search a location:</h6>
