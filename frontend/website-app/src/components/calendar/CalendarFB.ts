@@ -26,6 +26,7 @@ type dateInfo = {
     events : event[];
 }
 type event = {
+    eventID : number
     eventName : string;
     startTime : string;
     endTime : string;
@@ -53,7 +54,7 @@ function nextValidID(date: string) : number {
 /**
  * Put an event into the database
  *
- * TODO: modify to just take a date object?
+ * TODO: modify to just take a date object
  * @param eventName
  * @param startTime
  * @param endTime
@@ -66,6 +67,7 @@ function writeNewEvent(event: event, date: string) : void{
     const reference = ref(db, 'Dates/' + date + '/' + validID);
 
     set(reference, {
+        eventID: validID,
         eventName: event.eventName,
         startTime: event.startTime,
         endTime: event.endTime,
@@ -118,6 +120,7 @@ function getAllDates() : dateInfo[] {
                 console.log("event val: " + eventSnapshot.val())
                 const currEvent = eventSnapshot.val();
                 const newEvent = <event>({
+                    eventID: currEvent.eventID,
                     startTime: currEvent.startTime,
                     endTime: currEvent.endTime,
                     eventName: currEvent.eventName,
