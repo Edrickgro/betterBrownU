@@ -41,11 +41,12 @@ function decrement(ID: string){
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
+        if (!post) {return;}
         if(post.Occupancy === 0){
             return post;
         }
         post.Occupancy--;
-        return post
+        return post;
     });
 }
 
@@ -55,6 +56,7 @@ function increment(ID: string){
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
+        if (!post) {return;}
         post.Occupancy++;
         return post
     });
@@ -281,18 +283,12 @@ function addDataIntoCache(cacheName: string, url: string, response: string) {
         // Opening given cache and putting our data into it
         caches.open(cacheName).then((cache) => {
             cache.put(url, data);
-            alert('Data Added into cache!')
         });
     }
 }
 
-// Function to get all cache data
-async function getAllCacheData() {
-    let url = 'https://localhost:3000'
-
-    // List of all caches present in browser
-    let name = "GeolocatorCache" //await caches.keys()
-
+// Function to get cache data
+async function getCacheData(name: string, url: string) {
     let cacheDataArray: string[] = []
 
     // Opening that particular cache
@@ -310,8 +306,11 @@ async function getAllCacheData() {
     cacheDataArray.push(data)
     userLocation = cacheDataArray[cacheDataArray.length - 1]
     console.log("ERROR CHECK: getcache... " + cacheDataArray[cacheDataArray.length - 1])
-
+    console.log("ERROR CHECK: getcache2..." + cacheDataArray)
     /*
+        // List of all caches present in browser
+    let name =  //await caches.keys()
+
     // Iterating over the list of caches
     for (const name of names) {
 
@@ -350,7 +349,7 @@ function Geolocator() {
 
     useEffect(() => {
         console.log("ERROR CHECK: useEffect 1")
-        getAllCacheData()
+        getCacheData("GeolocatorCache", "https://localhost:3000")
         getJsonList(setDatabase)
         setInterval(() => geoFindMe(database), 600000) // 10 minutes
     }, []);
@@ -364,8 +363,6 @@ function Geolocator() {
                         geoFindMe(database)
                         console.log("ERROR CHECK: refresh")
                     }}>Click to Reload</button>
-                    <button onClick={() => addDataIntoCache("GeolocatorCache", "https://localhost:3000", "check 1")}>hello cache!</button>
-                    <button onClick={() => getAllCacheData()}>get cache!</button>
                     <p id = "status"></p>
 
                     <div>
@@ -398,6 +395,8 @@ function Geolocator() {
 export default Geolocator;
 
 /**
+ * <button onClick={() => getCacheData("GeolocatorCache", "https://localhost:3000")}>get cache!</button>
+ *
  * <p id = "status"></p>
  <a id = "map-link" target="_blank"></a>
  *
