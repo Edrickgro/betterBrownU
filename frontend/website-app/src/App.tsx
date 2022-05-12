@@ -1,11 +1,11 @@
 import React from 'react';
-import '../App.css';
-import Menu from "./navigation/Navigation";
+import './App.css';
+import Menu from "./components/navigation/Navigation";
 import { NavLink } from "react-router-dom";
-import Home from "./home/Home";
-import Geolocator from "./geolocator/Geolocator";
-import Calendar from "./calendar/Calendar";
-import Account from "./account/Account";
+import Home from "./components/home/Home";
+import Geolocator from "./components/geolocator/Geolocator";
+import Calendar from "./components/calendar/Calendar";
+import Account from "./components/account/Account";
 
 
 function App() {

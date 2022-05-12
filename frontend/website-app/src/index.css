@@ -83,6 +83,166 @@ code {
   transform-origin: bottom left;
 }
 
+/* menu items */
+.menu-item {
+  margin-left: 30px;
+  margin-top: 20px;
+}
+
+/* geolocator table */
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table td {
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 45%;
+  padding-right: 10px;
+  padding-top: 5px;
+}
+
+.table-location {
+  font-weight: 700;
+}
+
+.table-busy {
+  color: black;
+  background-color: #faa79d;
+  border-radius: 11px;
+  text-align: center;
+  color: #9c291c;
+  font-weight: 550;
+  padding-left: 10px;
+}
+
+.table-not{
+  color: black;
+  background-color: #e1fae4;
+  border-radius: 11px;
+  text-align: center;
+  color: #39a869;
+  font-weight: 550;
+  padding-left: 10px;
+
+}
+
+.table-a {
+  color: black;
+  background-color: #fce5bd;
+  border-radius: 11px;
+  text-align: center;
+  color: #c4871d;
+  font-weight: 550;
+  padding-left: 10px;
+}
+
+#geolocatorMain{
+  min-height: 90vh;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#geolocator-search-bar{
+  border-radius:20px;
+  width: 210px;
+  border-color: transparent;
+  background-color: #e6e4e3;
+  transition: width .35s ease-in-out;
+  padding-left: 36px;
+  height: 22px;
+
+}
+
+.geoInlineBlock1{
+  display: inline-flex;
+}
+
+.geoInlineBlock2{
+  display: inline-block;
+}
+
+#geolocator-load{
+  border-radius: 10px;
+  border-color: transparent;
+  background-color: #C00404;
+  color: #f5f5f5;
+  transition: 0.3s;
+
+}
+
+#geolocator-load:hover{
+  background-color: black;
+}
+
+#geoCampusLoc{
+  padding-right: 20px;
+}
+
+.glassGeolocatorMap{
+
+  background-color: #f8f8f8;
+  border-radius: 20px;
+  margin-right: auto;
+  margin-left: auto;
+  margin-bottom: 265px;
+  margin-top: 20px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-left: 10px;
+  opacity: 1;
+
+  animation-name: geoMap;
+  animation-duration: 4s;
+}
+
+@keyframes geoMap{
+  from{
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.glassGeolocatorTable{
+  height: auto;
+  width: auto;
+  background: #f8f8f8;
+  border-radius: 20px;
+  margin-right: auto;
+  margin-left: 50px;
+  margin-bottom: 250px;
+  margin-top: 20px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-right: 25px;
+  opacity: 1;
+
+  animation-name: geoTable;
+  animation-duration: 2s;
+}
+
+@keyframes geoTable{
+  from{
+    margin-bottom: 240px;
+    opacity: 0.5;
+  }
+  to {
+    margin-bottom: 265px;
+    opacity: 1;
+  }
+}
+
+#openstreetmap{
+  width: 55vw;
+  height: 30vw;
+}
+
 /* calendar */
 .event-item {
   background-color: aliceblue;
@@ -101,42 +261,6 @@ code {
   padding-left: 5%;
   padding-top: 2%;
   display: flex;
-  flex-wrap: wrap;
-}
-
-/* geolocator table */
-.center {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-table td {
-  border-collapse: collapse;
-  text-align: left;
-  min-width: 45%;
-}
-
-.table-location {
-  font-weight: 700;
-}
-
-.table-busy {
-  color: red;
-}
-
-.table-not {
-  color: green;
-}
-
-.table-a {
-  color: gold;
-}
-
-
-/* menu items */
-.menu-item {
-  margin-left: 30px;
-  margin-top: 20px;
 }
 
 /* event adders that are children of calendar divs*/
