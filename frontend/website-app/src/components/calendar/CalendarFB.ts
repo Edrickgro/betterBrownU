@@ -37,33 +37,37 @@ type event = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase();
 
+/**
+ * Get the next valid unique ID for a certain date. Loops through all the events on a particular date and adds
+ * one to the highest ID found
+ * @param date = the date that the particular event will be on
+ */
 function nextValidID(date: string) : number {
     const dateRef = ref(db, 'Dates/' + date);
-    let numChildren : number = 0;
+    let highestID : number = 0;
     onValue(dateRef, (dateSnapshot) => {
         // if the date does exist, id is number of children
         if (dateSnapshot.exists()) {
-            dateSnapshot.forEach((eventSnapshot) => {
-                numChildren++
+            dateSnapshot.forEach(e => {
+                console.log(parseInt(e.val().eventID))
+                if (parseInt(e.val().eventID) <= highestID) {
+                    highestID = parseInt(e.val().eventID)+1
+                }
             })
         }
     })
-    return numChildren
+    return highestID
 }
 
 /**
  * Put an event into the database
  *
  * TODO: modify to just take a date object
- * @param eventName
- * @param startTime
- * @param endTime
- * @param info
- * @param date
- * @param eventID
+ * @param event = an event object storing the information to pass to the Firebase database
  */
 function writeNewEvent(event: event, date: string) : void{
     const validID = nextValidID(date)
+    console.log("validID: " + validID)
     const reference = ref(db, 'Dates/' + date + '/' + validID);
 
     set(reference, {
@@ -108,7 +112,7 @@ function getAllDates() : dateInfo[] {
     //TODO: figure out how to loop through the fucking keys
     // snapshot is of Dates
     onValue(datesRef, (dirSnapshot) => {
-        console.log("Onvalue was called " + dirSnapshot.key)
+        // console.log("Onvalue was called " + dirSnapshot.key)
         // iterate and add each to return list
         //iterating through dates
         dirSnapshot.forEach((dateSnapshot) => {
@@ -117,7 +121,7 @@ function getAllDates() : dateInfo[] {
             // add each event to date's event list
             let dateEvents : event[] = [];
             dateSnapshot.forEach((eventSnapshot) => {
-                console.log("event val: " + eventSnapshot.val())
+                // console.log("event val: " + eventSnapshot.val())
                 const currEvent = eventSnapshot.val();
                 const newEvent = <event>({
                     eventID: currEvent.eventID,

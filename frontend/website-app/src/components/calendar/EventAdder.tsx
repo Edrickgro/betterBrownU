@@ -29,11 +29,11 @@ function EventAdder() {
     return  <div className={"event-adder"}>
                 <button onClick={()=>setShowForm(!showForm)}>Show adder menu</button>
         {showForm ? <div id={"event-adder-form"}>
-                        <AdderInput label={"Date (yyyy-mm-dd):"} change={setDate}/>
-                        <AdderInput label={"Event Name:"} change={setEventName}/>
-                        <AdderInput label={"Start Time:"} change={setEventStart}/>
-                        <AdderInput label={"End Time:"} change={setEventEnd}/>
-                        <AdderInput label={"Extra Info/Description:"} change={setEventInfo}/>
+                        <AdderInput label={"Date (yyyy-mm-dd):"} change={setDate} type={"date"}/>
+                        <AdderInput label={"Event Name:"} change={setEventName} type={"text"}/>
+                        <AdderInput label={"Start Time:"} change={setEventStart} type={"text"}/>
+                        <AdderInput label={"End Time:"} change={setEventEnd} type={"text"}/>
+                        <AdderInput label={"Extra Info/Description:"} change={setEventInfo} type={"text"}/>
                         <button onClick={sendEventToBackend}>Add Event!</button>
                     </div> : null}
             </div>

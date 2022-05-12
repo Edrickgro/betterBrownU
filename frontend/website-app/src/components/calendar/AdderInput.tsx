@@ -1,9 +1,15 @@
 import React from "react"
 
-function AdderInput(props: any) {
+type adderProps = {
+    type: string,
+    label: string,
+    change: Function,
+}
+
+function AdderInput(props: adderProps) {
     return <div className={"adder-input"}>
                 <label>{props.label}</label>
-                <input type="text" onChange={event => {props.change(event.target.value)}}></input>
+                <input type={props.type} onChange={event => {props.change(event.target.value)}}></input>
             </div>
 }
 
