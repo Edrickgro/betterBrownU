@@ -15,7 +15,7 @@ interface Location {
 }
 
 // User's campus location
-let userLocation: Location | null = null;
+let userLocation: string | null = null;
 
 // Ratio used to determine how busy a campus location is
 const occupancyRatio = [0.33, 0.66];
@@ -233,23 +233,27 @@ function checkUserCoords(database: Location[] | null, userCoords: number[] | nul
             if (!userLocation) {
                 // If user was not in a campus location before
                 increment(location.Name)
-                console.log("ERROR CHECK: location is..." + location.Name)
-            } else if (location.Name !== userLocation.Name) {
+                addDataIntoCache("GeolocatorCache", "https://localhost:3000", location.Name)
+            } else if (location.Name !== userLocation) {
                 // If user moved from one campus location to another
-                decrement(userLocation.Name)
+                console.log("ERROR CHECK: userLocation: " + userLocation + " , newLocation: " + location.Name)
+                decrement(userLocation)
                 increment(location.Name)
+                addDataIntoCache("GeolocatorCache", "https://localhost:3000", location.Name)
             }
 
+            console.log("ERROR CHECK: location is..." + location.Name)
             // Set userLocation to the user's current location
-            userLocation = location
+            userLocation = location.Name
             break;
         }
     }
 
     // If user was in a campus location but not any more
     if (!isInSomeLocation && userLocation) {
-        decrement(userLocation.Name)
+        decrement(userLocation)
         userLocation = null
+        addDataIntoCache("GeolocatorCache", "https://localhost:3000", "null")
     }
 }
 
@@ -280,7 +284,58 @@ function addDataIntoCache(cacheName: string, url: string, response: string) {
             alert('Data Added into cache!')
         });
     }
-};
+}
+
+// Function to get all cache data
+async function getAllCacheData() {
+    let url = 'https://localhost:3000'
+
+    // List of all caches present in browser
+    let name = "GeolocatorCache" //await caches.keys()
+
+    let cacheDataArray: string[] = []
+
+    // Opening that particular cache
+    const cacheStorage = await caches.open(name);
+
+    // Fetching that particular cache data
+    const cachedResponse = await cacheStorage.match(url);
+    if (!cachedResponse) {
+        console.log("ERROR CHECK: no cache")
+        return;
+    }
+    var data = await cachedResponse.json()
+
+    // Pushing fetched data into our cacheDataArray
+    cacheDataArray.push(data)
+    userLocation = cacheDataArray[cacheDataArray.length - 1]
+    console.log("ERROR CHECK: getcache... " + cacheDataArray[cacheDataArray.length - 1])
+
+    /*
+    // Iterating over the list of caches
+    for (const name of names) {
+
+        // Opening that particular cache
+        const cacheStorage = await caches.open(name);
+
+        // Fetching that particular cache data
+        const cachedResponse = await cacheStorage.match(url);
+        if (!cachedResponse) {
+            console.log("ERROR CHECK: no cache")
+            continue;
+        }
+        var data = await cachedResponse.json()
+
+        // Pushing fetched data into our cacheDataArray
+        cacheDataArray.push(data)
+        userLocation = cacheDataArray[cacheDataArray.length - 1]
+        console.log("ERROR CHECK: getcache... " + cacheDataArray[cacheDataArray.length - 1])
+        //setCacheData(cacheDataArray.join(', '))
+        //console.log("ERROR CHECK: get cache... " + name + " , data: " + cacheDataArray.join(', '))
+    }
+
+     */
+}
 
 /*
 * Main functional component of Geolocator.tsx.
@@ -292,43 +347,13 @@ function Geolocator() {
     console.log("ERROR CHECK: RENDER")
 
     const [database, setDatabase] = useState<Location[]>([])
-    // Our state to store fetched cache data
 
     useEffect(() => {
         console.log("ERROR CHECK: useEffect 1")
+        getAllCacheData()
         getJsonList(setDatabase)
         setInterval(() => geoFindMe(database), 600000) // 10 minutes
     }, []);
-
-    // Function to get all cache data
-    async function getAllCacheData() {
-        var url = 'https://localhost:3000'
-
-        // List of all caches present in browser
-        var names = await caches.keys()
-
-        let cacheDataArray: any[] = []
-
-        // Iterating over the list of caches
-        for (const name of names) {
-
-            // Opening that particular cache
-            const cacheStorage = await caches.open(name);
-
-            // Fetching that particular cache data
-            const cachedResponse = await cacheStorage.match(url);
-            if (!cachedResponse) {
-                console.log("ERROR CHECK: no cache")
-                continue;
-            }
-            var data = await cachedResponse.json()
-
-            // Pushing fetched data into our cacheDataArray
-            cacheDataArray.push(data)
-            //setCacheData(cacheDataArray.join(', '))
-            console.log("ERROR CHECK: get cache... " + name + " " + cacheDataArray.join(', '))
-        }
-    };
 
     return (
         <main id="geolocatorMain">
@@ -339,8 +364,7 @@ function Geolocator() {
                         geoFindMe(database)
                         console.log("ERROR CHECK: refresh")
                     }}>Click to Reload</button>
-                    <button onClick={() => addDataIntoCache("MyCache", "https://localhost:3000", "check 1")}>hello cache!</button>
-                    <button onClick={() => addDataIntoCache("UrmomCache", "https://localhost:3000", "hello")}>ur mom cache!</button>
+                    <button onClick={() => addDataIntoCache("GeolocatorCache", "https://localhost:3000", "check 1")}>hello cache!</button>
                     <button onClick={() => getAllCacheData()}>get cache!</button>
                     <p id = "status"></p>
 
