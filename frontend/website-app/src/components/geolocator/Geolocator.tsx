@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import {getDatabase, onValue, ref, set, push, get, child, onChildChanged, update, runTransaction} from "firebase/database";
+import { getDatabase, onValue, ref, runTransaction } from "firebase/database";
 
 // Location interface used to represent campus locations
 interface Location {
@@ -16,9 +16,6 @@ interface Location {
 
 // User's campus location
 let userLocation: Location | null = null;
-
-// User's coordinates, cannot be accessed by developers
-let userCoords: number[] | null = null;
 
 // Ratio used to determine how busy a campus location is
 const occupancyRatio = [0.33, 0.66];
@@ -38,14 +35,6 @@ const firebaseApp = initializeApp({
 // Connect to Firebase database
 const db = getDatabase();
 
-// Returns the occupancy of a campus location
-function getOccupancy(ID: string){
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, 'Locations/' + ID + '/Occupancy')).then((snapshot) =>{
-        console.log(snapshot.val());
-    });
-}
-
 // Decrements the occupancy of a campus location by 1
 function decrement(ID: string){
     const db = getDatabase();
@@ -56,7 +45,6 @@ function decrement(ID: string){
             return post;
         }
         post.Occupancy--;
-
         return post
     });
 }
@@ -74,33 +62,10 @@ function increment(ID: string){
 
 // Converts Firebase database into a list of Locations and returns that list
 function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]>>) {
-    //setDatabase: React.Dispatch<React.SetStateAction<Location[] | null>>
+
     const db = getDatabase();
-    const dbRef = ref(getDatabase());
     const distanceRef = ref(db, 'Locations/');
     let isInitial = true;
-
-    //no iteration method
-    /**
-     * let data;
-     onValue(distanceRef, (snapshot) =>{
-        data = snapshot.val();
-    });
-     return data;
-     */
-
-    /*
-    get(child(dbRef, 'Locations/')).then((snapshot) =>{
-        console.log("ERROR CHECK: GET COMPLETE.");
-        let list: Location[] = [];
-        let json = snapshot.val();
-        for(let i in json){
-            let jsonObject: Location = JSON.parse(JSON.stringify(json[i]));
-            list.push(jsonObject);
-        }
-        setDatabase(list)
-    });
-    */
 
     //iteration method (Location interface)
     onValue(distanceRef, (snapshot) =>{
@@ -127,14 +92,15 @@ function geoFindMe(database: Location[] | null) {
     const status: HTMLElement | null = document.getElementById("status")
     //const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
     const mapLink: HTMLIFrameElement | null = document.getElementById("openstreetmap") as HTMLIFrameElement;
-    const options = {
-        enableHighAccuracy: true
-    };
+    const table: HTMLTableElement = document.getElementById("geolocator-table") as HTMLTableElement;
+    const map: HTMLElement = document.getElementById("geolocator-map") as HTMLElement;
 
     //mapLink!.href = '';
     //mapLink!.textContent = '';
 
     function success(position: any) {
+        table.style.display = "";
+        map.style.display = "";
         console.log("ERROR CHECK: GETTING LOCATION")
         const latitude  = position.coords.latitude;
         const longitude = position.coords.longitude;
@@ -156,21 +122,31 @@ function geoFindMe(database: Location[] | null) {
     }
 
     function error() {
+        table.style.display = "none";
+        map.style.display = "none";
         status!.textContent = 'Unable to retrieve your location';
+        alert("Please allow location sharing.");
     }
 
     if(!navigator.geolocation) {
         console.log("WORK");
         status!.textContent = 'Geolocation is not supported by your browser';
     } else {
+        let options = {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 0
+        };
         status!.textContent = 'Locating…';
         navigator.geolocation.getCurrentPosition(success, error, options);
     }
 
 }
 
-// Displays appropriate entries in the campus locations table when the search
-// bar has an input.
+/*
+* Displays appropriate entries in the campus locations table when the search bar
+* has an input.
+*/
 function displaySearch() {
 
     // Get HTML element corresponding to the search bar
@@ -194,8 +170,10 @@ function displaySearch() {
     })
 }
 
-// Determines if a user is in a campus location and modifies the occupancy of
-// the corresponding campus location accordingly.
+/*
+* Determines if a user is in a campus location and modifies the occupancy of
+* the corresponding campus location accordingly.
+*/
 function checkUserCoords(database: Location[] | null, userCoords: number[] | null) {
 
     // Check if database or userCoords is undefined or null
@@ -210,10 +188,12 @@ function checkUserCoords(database: Location[] | null, userCoords: number[] | nul
         return coord * Math.PI / 180;
     }
 
-    // Finds the distance between two coordinates and determines if the user's
-    // coordinates in the location's predetermined radius.
-    // Some code used from:
-    // https://www.geeksforgeeks.org/program-distance-two-points-earth/
+    /*
+    * Finds the distance between two coordinates and determines if the user's
+    * coordinates in the location's predetermined radius.
+    * Some code used from:
+    * https://www.geeksforgeeks.org/program-distance-two-points-earth/
+    */
     function isInRadius(radius: number, lon1: number, lat1: number, lon2: number, lat2: number): boolean {
 
         // Convert coordinates to radians
@@ -241,8 +221,10 @@ function checkUserCoords(database: Location[] | null, userCoords: number[] | nul
         return (distance <= radius);
     }
 
-    // For each campus location, determine if the user's coordinates are within
-    // a campus location
+    /*
+     * For each campus location, determine if the user's coordinates are within
+     * a campus location
+     */
     for (let location of database) {
 
         if (isInRadius(location.Radius, location.Longitude, location.Latitude, userCoords[0], userCoords[1])) {
@@ -252,7 +234,6 @@ function checkUserCoords(database: Location[] | null, userCoords: number[] | nul
                 // If user was not in a campus location before
                 increment(location.Name)
                 console.log("ERROR CHECK: location is..." + location.Name)
-                // TODO: update database and database state
             } else if (location.Name !== userLocation.Name) {
                 // If user moved from one campus location to another
                 decrement(userLocation.Name)
@@ -287,39 +268,31 @@ function findBusiness(location: Location): string {
     }
 }
 
-function displayTable(database: Location[]) {
+// Function to add our give data into cache
+function addDataIntoCache(cacheName: string, url: string, response: string) {
+    // Converting our response into Actual Response form
+    const data = new Response(JSON.stringify(response));
 
-    const body: HTMLTableSectionElement = document.getElementById("geolocator-table-body") as HTMLTableSectionElement;
-    if (!body) {return;}
-    body.innerHTML = "";
-    let bodyHTML = "";
-    for (let item of database) {
-        bodyHTML += `<tr class="table-row" id=${"\"" + item.Search + "\""}>`;
-        bodyHTML += `<td class="table-location">${item.Name}</td>`;
-        bodyHTML += `<td class=${"table-" + findBusiness(item)}>${findBusiness(item)}</td>`;
-        //bodyHTML += `<td>${item.Occupancy}</td>`;
-        bodyHTML += `</tr>`;
+    if ('caches' in window) {
+        // Opening given cache and putting our data into it
+        caches.open(cacheName).then((cache) => {
+            cache.put(url, data);
+            alert('Data Added into cache!')
+        });
     }
+};
 
-    /**database.map(item => {
-        bodyHTML += '<tr className="table-row" id={item.Search}>'
-        bodyHTML += '<td className="table-location">{item.Name}</td>'
-        bodyHTML += '<td className={"table-" + findBusiness(item)}>{findBusiness(item)}</td>'
-        bodyHTML += '<td>{item.Occupancy}</td>'
-        bodyHTML += '</tr>'
-    })**/
-
-    body.innerHTML += bodyHTML;
-}
-
-// Main functional component of Geolocator.tsx.
-// Initiates the database state and returns the HTML code for the Campus
-// Locations page.
+/*
+* Main functional component of Geolocator.tsx.
+* Initiates the database state and returns the HTML code for the Campus
+* Locations page.
+*/
 function Geolocator() {
 
     console.log("ERROR CHECK: RENDER")
 
     const [database, setDatabase] = useState<Location[]>([])
+    // Our state to store fetched cache data
 
     useEffect(() => {
         console.log("ERROR CHECK: useEffect 1")
@@ -327,13 +300,35 @@ function Geolocator() {
         setInterval(() => geoFindMe(database), 600000) // 10 minutes
     }, []);
 
-    /*
-    useEffect( () => {
-        console.log("ERROR CHECK: useEffect 2")
-        geoFindMe(database)
-        //displayTable(database)
-    }, [database])
-     */
+    // Function to get all cache data
+    async function getAllCacheData() {
+        var url = 'https://localhost:3000'
+
+        // List of all caches present in browser
+        var names = await caches.keys()
+
+        let cacheDataArray: any[] = []
+
+        // Iterating over the list of caches
+        for (const name of names) {
+
+            // Opening that particular cache
+            const cacheStorage = await caches.open(name);
+
+            // Fetching that particular cache data
+            const cachedResponse = await cacheStorage.match(url);
+            if (!cachedResponse) {
+                console.log("ERROR CHECK: no cache")
+                continue;
+            }
+            var data = await cachedResponse.json()
+
+            // Pushing fetched data into our cacheDataArray
+            cacheDataArray.push(data)
+            //setCacheData(cacheDataArray.join(', '))
+            console.log("ERROR CHECK: get cache... " + name + " " + cacheDataArray.join(', '))
+        }
+    };
 
     return (
         <main id="geolocatorMain">
@@ -341,20 +336,12 @@ function Geolocator() {
                 <div id="geolocator" className="menu-item">
                     <h3 className="geoInlineBlock1" id="geoCampusLoc">Campus Locations</h3>
                     <button className="geoInlineBlock1" id="geolocator-load" onClick={() => {
-                        /*if (!database) {
-                            setDatabase(getJsonList())
-                        }
-                        geoFindMe()
-                        checkUserCoords(database)
-                        setDatabase(getJsonList())
-                        let button = document.getElementById("geolocator-button")
-                        if (button) {button.innerHTML = "Reload!"}
-                        //getJsonList(setDatabase)
-                        //{displayTable(database)}
-                        */
                         geoFindMe(database)
                         console.log("ERROR CHECK: refresh")
                     }}>Click to Reload</button>
+                    <button onClick={() => addDataIntoCache("MyCache", "https://localhost:3000", "check 1")}>hello cache!</button>
+                    <button onClick={() => addDataIntoCache("UrmomCache", "https://localhost:3000", "hello")}>ur mom cache!</button>
+                    <button onClick={() => getAllCacheData()}>get cache!</button>
                     <p id = "status"></p>
 
                     <div>
@@ -362,7 +349,7 @@ function Geolocator() {
                         <input className="geoInlineBlock2" placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displaySearch()}/>
                     </div>
 
-                    <table>
+                    <table id="geolocator-table">
                         <thead className="table-header" id="geolocator-table-header"></thead>
                         <tbody id="geolocator-table-body" className="table-body">
                             {database?.map(
@@ -377,7 +364,7 @@ function Geolocator() {
                 </div>
             </section>
 
-            <section className = "glassGeolocatorMap">
+            <section className = "glassGeolocatorMap" id="geolocator-map">
                 <iframe id = "openstreetmap" src=''></iframe>
             </section>
         </main>
