@@ -127,9 +127,7 @@ function geoFindMe(database: Location[] | null) {
     const status: HTMLElement | null = document.getElementById("status")
     //const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
     const mapLink: HTMLIFrameElement | null = document.getElementById("openstreetmap") as HTMLIFrameElement;
-    const options = {
-        enableHighAccuracy: true
-    };
+
 
     //mapLink!.href = '';
     //mapLink!.textContent = '';
@@ -163,6 +161,11 @@ function geoFindMe(database: Location[] | null) {
         console.log("WORK");
         status!.textContent = 'Geolocation is not supported by your browser';
     } else {
+        var options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+        };
         status!.textContent = 'Locating…';
         navigator.geolocation.getCurrentPosition(success, error, options);
     }
