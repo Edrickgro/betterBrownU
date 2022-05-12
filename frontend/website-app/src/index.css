@@ -261,5 +261,10 @@ table td {
   padding-left: 5%;
   padding-top: 2%;
   display: flex;
+}
+
+/* event adders that are children of calendar divs*/
+.event-adder {
+  display: block;
   flex-wrap: wrap;
 }
