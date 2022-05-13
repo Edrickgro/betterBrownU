@@ -17,12 +17,12 @@ code {
 .brown-logo-img {
   max-width: 30%;
   float: left;
-  margin-top: 5px;
+  margin-top: 1vh;
 }
 
 .navigation {
   background-color: #381C00;
-  height: 100px;
+  height: 17vh;
 }
 
 .navbar-brand {
@@ -31,7 +31,7 @@ code {
 }
 
 .navbar-items {
-  margin-top: 25px;
+  margin-top: 4.5vh;
   display: inline-block;
 }
 
@@ -70,8 +70,8 @@ code {
   position: absolute;
   width: 60%;
   transform: scaleX(0);
-  height: 2px;
-  bottom: 5px;
+  height: 0.3vh;
+  bottom: 1vh;
   left: 20%;
   background-color: #E4002B;
   transform-origin: bottom right;
@@ -85,8 +85,9 @@ code {
 
 /* menu items */
 .menu-item {
-  margin-left: 30px;
-  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 4vh;
 }
 
 /* geolocator table */
@@ -95,15 +96,19 @@ code {
   margin-right: auto;
 }
 
-table td {
+.geolocator-table {
   border-collapse: collapse;
-  text-align: left;
-  min-width: 45%;
+}
+
+.geolocator-table td {
+  min-width: auto;
   padding-right: 10px;
   padding-top: 5px;
+  margin-top: 10px;
 }
 
 .table-location {
+  text-align: left;
   font-weight: 700;
 }
 
@@ -125,7 +130,6 @@ table td {
   color: #39a869;
   font-weight: 550;
   padding-left: 10px;
-
 }
 
 .table-a {
@@ -142,7 +146,6 @@ table td {
   min-height: 90vh;
   background: white;
   display: flex;
-  align-items: center;
   justify-content: center;
 }
 
@@ -198,6 +201,8 @@ table td {
 
   animation-name: geoMap;
   animation-duration: 4s;
+
+  height: 35vw;
 }
 
 @keyframes geoMap{
@@ -210,6 +215,7 @@ table td {
 }
 
 .glassGeolocatorTable{
+
   height: auto;
   width: auto;
   background: #f8f8f8;
@@ -240,8 +246,9 @@ table td {
 
 #openstreetmap{
   width: 55vw;
-  height: 30vw;
+  height: 33vw;
 }
+
 
 /* calendar */
 .event-item {
