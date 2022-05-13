@@ -1,8 +1,7 @@
 import React, {useState} from 'react'
 import AdderInput from "./AdderInput";
-import Event from "./Event";
 import {writeNewEvent} from "./CalendarFB";
-import {Toaster} from "react-hot-toast";
+import {toast, Toaster} from "react-hot-toast";
 
 function EventAdder(props: any) {
     const [showForm, setShowForm] = useState(false);
@@ -12,9 +11,10 @@ function EventAdder(props: any) {
     const [newEventEnd, setEventEnd] = useState("");
     const [eventInfo, setEventInfo] = useState("");
 
-    function sendEventToBackend() {
+    function sendEventToBackend() : boolean {
         if (dateName==="" || newEventName==="" || newEventStart==="" || newEventEnd ==="") {
-            console.log("a necessary field is empty");
+            toast.error("a necessary field is empty");
+            return false;
         } else {
             let newEvent = {
                 eventID: 0, //will get overwritten
@@ -23,7 +23,12 @@ function EventAdder(props: any) {
                 endTime : newEventEnd,
                 info: eventInfo
             }
-            writeNewEvent(newEvent, dateName);
+            if (Date.parse(dateName + " " + newEventStart) < Date.parse(dateName + " " + newEventEnd)) {
+                return writeNewEvent(newEvent, dateName);
+            } else {
+                toast.error("Start time needs to be after end time")
+                return false;
+            }
         }
     }
 
@@ -38,8 +43,9 @@ function EventAdder(props: any) {
                         <AdderInput label={"End Time:"} change={setEventEnd} type={"time"}/>
                         <AdderInput label={"Extra Info/Description:"} change={setEventInfo} type={"text"}/>
                         <button onClick={()=>{
-                            sendEventToBackend();
-                            setShowForm(false);
+                            if (sendEventToBackend()) {
+                                setShowForm(false);
+                            }
                         }}>Add Event!</button>
                     </div> : null}
                 </div>

@@ -68,7 +68,7 @@ function nextValidID(date: string) : number {
  * TODO: modify to just take a date object
  * @param event = an event object storing the information to pass to the Firebase database
  */
-function writeNewEvent(event: event, date: string) : void{
+function writeNewEvent(event: event, date: string) : boolean {
     const validID = nextValidID(date)
     console.log("validID: " + validID)
     const reference = ref(db, 'Dates/' + date + '/' + validID);
@@ -79,11 +79,15 @@ function writeNewEvent(event: event, date: string) : void{
         startTime: event.startTime,
         endTime: event.endTime,
         info: event.info
-    }).then(() => {toast("\""+event.eventName + "\" added to the calendar!")}).catch((error) => {
+    }).then(() => {
+        toast("\""+event.eventName + "\" added to the calendar!"); return true;
+    }).catch((error) => {
         console.log(error);
         toast.error("There was an error submitting your event");
-
+        return false;
     })
+
+    return true;
 }
 
 /**
