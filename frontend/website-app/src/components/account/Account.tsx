@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {signInWithGoogle, signOutofAccount} from "../../firebase";
-import "./account.css"
+import "../home/button.css"
 
 function Account() {
 

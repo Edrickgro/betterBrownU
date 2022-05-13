@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import Date from "./Date"
-import {signedIn, signInWithGoogle} from "../../firebase";
+import {signedIn, signInWithGoogle, validIds} from "../../firebase";
 
 //TODO is there a way to have this be a global type so I don't have to reimport
 type event = {
@@ -28,6 +28,7 @@ function Calendar () {
      */
 
     function load_data () {
+
         if(signedIn) {
             setDateList(getCalendarInfo());
         }else {
