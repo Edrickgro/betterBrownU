@@ -362,7 +362,7 @@ function Geolocator() {
                     <button className="geoInlineBlock1" id="geolocator-load" onClick={() => {
                         geoFindMe(database)
                         console.log("ERROR CHECK: refresh")
-                    }}>Click to Reload</button>
+                    }}>Refresh Your Location!</button>
                     <p id = "status"></p>
 
                     <div>
@@ -370,7 +370,7 @@ function Geolocator() {
                         <input className="geoInlineBlock2" placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displaySearch()}/>
                     </div>
 
-                    <table id="geolocator-table">
+                    <table className="geolocator-table" id="geolocator-table">
                         <thead className="table-header" id="geolocator-table-header"></thead>
                         <tbody id="geolocator-table-body" className="table-body">
                             {database?.map(
