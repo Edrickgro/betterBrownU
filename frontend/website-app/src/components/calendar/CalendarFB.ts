@@ -1,7 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { Console } from "console";
 import { initializeApp } from "firebase/app";
-import {ref, set, onValue} from 'firebase/database';
+import { getDatabase, ref, set, onValue, remove} from 'firebase/database';
+import 'materialize-css';
+import {toast} from "react-hot-toast";
 import {db} from "../../firebase";
 
 // Structure of dates and events as defined in calendar.tsx
@@ -11,47 +13,72 @@ type dateInfo = {
     events : event[];
 }
 type event = {
+    eventID : number
     eventName : string;
     startTime : string;
     endTime : string;
     info : string;
 }
 
+
+/**
+ * Get the next valid unique ID for a certain date. Loops through all the events on a particular date and adds
+ * one to the highest ID found
+ * @param date = the date that the particular event will be on
+ */
+
 function nextValidID(date: string) : number {
     const dateRef = ref(db, 'Dates/' + date);
-    let numChildren : number = 0;
+    let highestID : number = 0;
     onValue(dateRef, (dateSnapshot) => {
         // if the date does exist, id is number of children
         if (dateSnapshot.exists()) {
-            dateSnapshot.forEach((eventSnapshot) => {
-                numChildren++
+            dateSnapshot.forEach(e => {
+                console.log(parseInt(e.val().eventID))
+                if (parseInt(e.val().eventID) <= highestID) {
+                    highestID = parseInt(e.val().eventID)+1
+                }
             })
         }
     })
-    return numChildren
+    return highestID
 }
 
 /**
  * Put an event into the database
  *
- * TODO: modify to just take a date object?
- * @param eventName
- * @param startTime
- * @param endTime
- * @param info
- * @param date
- * @param eventID
+ * TODO: modify to just take a date object
+ * @param event = an event object storing the information to pass to the Firebase database
  */
 function writeNewEvent(event: event, date: string) : void{
     const validID = nextValidID(date)
+    console.log("validID: " + validID)
     const reference = ref(db, 'Dates/' + date + '/' + validID);
 
     set(reference, {
+        eventID: validID,
         eventName: event.eventName,
         startTime: event.startTime,
         endTime: event.endTime,
         info: event.info
+    }).then(() => {toast("\""+event.eventName + "\" added to the calendar!")}).catch((error) => {
+        console.log(error);
+        toast.error("There was an error submitting your event");
+
     })
+}
+
+/**
+ * Remove the event from the database. TODO: then refresh
+ * @param eventID: the ID of the event to be deleted
+ * @param date: the date for the event
+ */
+function deleteEvent(eventID: number, date: string) : void {
+    const reference = ref(db, 'Dates/' + date + '/' + eventID);
+    console.log("delete: " + reference);
+    remove(reference)
+        .catch(()=>{toast.error("There was an error removing the event")})
+        .then(()=>{toast.success("Event deleted!")})
 }
 
 /**
@@ -76,18 +103,16 @@ function getDateEvents(date : string) : event[] {
  * Get all of the dates that have been added to the database.
  * @returns a list of dateInfo objects
  */
-function getAllDates() : dateInfo[] {
+function getAllDates() : {[date : string] : dateInfo} {
     const datesRef = ref(db, 'Dates/')
-    const swRef = ref(db, datesRef.key + "/" + "2022-04-29")
-    const badRef = ref(db, datesRef.key + "/" + "bad_ref")
     // TODO: child() doesn't work? shitty workaround
-    let retDates : dateInfo[] = []
+    let retDates : {[date: string] : dateInfo} = {}
     // get all dates that have been added
 
     //TODO: figure out how to loop through the fucking keys
     // snapshot is of Dates
     onValue(datesRef, (dirSnapshot) => {
-        console.log("Onvalue was called " + dirSnapshot.key)
+        // console.log("Onvalue was called " + dirSnapshot.key)
         // iterate and add each to return list
         //iterating through dates
         dirSnapshot.forEach((dateSnapshot) => {
@@ -96,9 +121,10 @@ function getAllDates() : dateInfo[] {
             // add each event to date's event list
             let dateEvents : event[] = [];
             dateSnapshot.forEach((eventSnapshot) => {
-                console.log("event val: " + eventSnapshot.val())
+                // console.log("event val: " + eventSnapshot.val())
                 const currEvent = eventSnapshot.val();
                 const newEvent = <event>({
+                    eventID: currEvent.eventID,
                     startTime: currEvent.startTime,
                     endTime: currEvent.endTime,
                     eventName: currEvent.eventName,
@@ -106,19 +132,18 @@ function getAllDates() : dateInfo[] {
                 });
                 dateEvents.push(newEvent)
             })
+            let dateName : string = ""+dateSnapshot.key
             // create date, add eventList to it, add to dateList
             const newDate =  <dateInfo>({
-                date: dateSnapshot.key,
+                date: dateName,
                 events: dateEvents
             })
-            retDates.push(newDate)
+            retDates[dateName] = newDate
+            // retDates.push(newDate)
         })
     });
+
     return retDates
 }
 
-// writeEvent("Spring Weekend", "18:30", "22:30", "Annual thing", "2022-04-29", "0");
-// writeEvent("lunch", "12:00", "13:00", "food optional", "2022-04-29", "1");
-
-// TODO: figure out what to export
-export {getAllDates, writeNewEvent}
+export {getAllDates, writeNewEvent, deleteEvent}

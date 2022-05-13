@@ -1,0 +1,64 @@
+button {
+    background-color: #381C00;
+    color: white;
+    border-radius: 5px;
+}
+
+.date-list{
+    justify-content: left;
+    text-align: left;
+}
+
+.event-item button{
+    background-color: grey;
+    margin-bottom: 7%;
+    color: black;
+}
+.event-item button:hover {
+    background-color: aliceblue;
+    box-shadow: 1px 1px;
+}
+
+p.event-item-title {
+    font-weight: bold;
+}
+
+.event-item {
+    background-color: aliceblue;
+    width: 17%;
+    padding: 0.5%;
+    margin: 1%;
+    border-radius: 10px;
+    box-shadow: 5px 8px;
+    display: inline-block;
+}
+
+.date-row {
+    padding: 0.5%;
+    margin: 2%;
+    border-radius: 10px;
+}
+
+.dates {
+    padding-top: 0.5%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.event-adder-form-wrapper{
+    display: flex;
+    padding: 1% 1% 2%;
+}
+
+.event-adder-form {
+    padding: 2%;
+    background-color: aliceblue;
+    box-shadow: 5px 8px;
+    border-radius: 10px;
+}
+
+.date-error-message {
+    padding: 1%;
+    font-style: italic;
+    text-align: center;
+}

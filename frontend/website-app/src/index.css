@@ -89,7 +89,6 @@ code {
   margin-right: auto;
   margin-top: 4vh;
 }
-
 /* geolocator table */
 .center {
   margin-left: auto;
@@ -247,31 +246,4 @@ code {
 #openstreetmap{
   width: 55vw;
   height: 33vw;
-}
-
-
-/* calendar */
-.event-item {
-  background-color: aliceblue;
-  width: 20%;
-  padding: 1%;
-  margin: 1%;
-}
-
-.date-row {
-  background-color: dimgrey;
-  padding: 2%;
-  margin: 2%;
-}
-
-.dates {
-  padding-left: 5%;
-  padding-top: 2%;
-  display: flex;
-}
-
-/* event adders that are children of calendar divs*/
-.event-adder {
-  display: block;
-  flex-wrap: wrap;
 }
