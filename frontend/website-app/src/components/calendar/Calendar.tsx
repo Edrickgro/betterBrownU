@@ -100,7 +100,7 @@ function Calendar () {
             <h3>Calendar</h3>
             <EventAdder/>
             <button onClick={load_data}>Click to (re)load!</button>
-            <div id={"date-list"}>
+            <div className={"date-list"}>
                 {generateDates()}
             </div>
         </div>
