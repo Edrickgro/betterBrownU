@@ -81,6 +81,7 @@ function writeNewEvent(event: event, date: string) : void{
     }).then(() => {toast("\""+event.eventName + "\" added to the calendar!")}).catch((error) => {
         console.log(error);
         toast.error("There was an error submitting your event");
+
     })
 }
 
@@ -119,12 +120,10 @@ function getDateEvents(date : string) : event[] {
  * Get all of the dates that have been added to the database.
  * @returns a list of dateInfo objects
  */
-function getAllDates() : dateInfo[] {
+function getAllDates() : {[date : string] : dateInfo} {
     const datesRef = ref(db, 'Dates/')
-    const swRef = ref(db, datesRef.key + "/" + "2022-04-29")
-    const badRef = ref(db, datesRef.key + "/" + "bad_ref")
     // TODO: child() doesn't work? shitty workaround
-    let retDates : dateInfo[] = []
+    let retDates : {[date: string] : dateInfo} = {}
     // get all dates that have been added
 
     //TODO: figure out how to loop through the fucking keys
@@ -150,19 +149,18 @@ function getAllDates() : dateInfo[] {
                 });
                 dateEvents.push(newEvent)
             })
+            let dateName : string = ""+dateSnapshot.key
             // create date, add eventList to it, add to dateList
             const newDate =  <dateInfo>({
-                date: dateSnapshot.key,
+                date: dateName,
                 events: dateEvents
             })
-            retDates.push(newDate)
+            retDates[dateName] = newDate
+            // retDates.push(newDate)
         })
     });
+
     return retDates
 }
 
-// writeEvent("Spring Weekend", "18:30", "22:30", "Annual thing", "2022-04-29", "0");
-// writeEvent("lunch", "12:00", "13:00", "food optional", "2022-04-29", "1");
-
-// TODO: figure out what to export
 export {getAllDates, writeNewEvent, deleteEvent}

@@ -4,7 +4,7 @@ import Event from "./Event";
 import {writeNewEvent} from "./CalendarFB";
 import {Toaster} from "react-hot-toast";
 
-function EventAdder() {
+function EventAdder(props: any) {
     const [showForm, setShowForm] = useState(false);
     const [dateName, setDate] = useState("");
     const [newEventName, setEventName] = useState("");
@@ -30,14 +30,19 @@ function EventAdder() {
     return  <div className={"event-adder"}>
                 <Toaster/>
                 <button onClick={()=>setShowForm(!showForm)}>Add an Event</button>
-        {showForm ? <div id={"event-adder-form"}>
+                <div className={"event-adder-form-wrapper"}>
+                    {showForm ? <div className={"event-adder-form"}>
                         <AdderInput label={"Date:"} change={setDate} type={"date"}/>
                         <AdderInput label={"Event Name:"} change={setEventName} type={"text"}/>
                         <AdderInput label={"Start Time:"} change={setEventStart} type={"time"}/>
                         <AdderInput label={"End Time:"} change={setEventEnd} type={"time"}/>
                         <AdderInput label={"Extra Info/Description:"} change={setEventInfo} type={"text"}/>
-                        <button onClick={sendEventToBackend}>Add Event!</button>
+                        <button onClick={()=>{
+                            sendEventToBackend();
+                            setShowForm(false);
+                        }}>Add Event!</button>
                     </div> : null}
+                </div>
             </div>
 }
 
