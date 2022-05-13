@@ -247,7 +247,7 @@ function findBusiness(location: Location): string {
 function addDataIntoCache(cacheName: string, response: string) {
     // Converting our response into Actual Response form
     const data = new Response(JSON.stringify(response));
-    let url = "https://cs32termproject.web.app/";
+    let url = "https://localhost:3000";
 
     if ('caches' in window) {
         // Opening given cache and putting our data into it
@@ -260,7 +260,7 @@ function addDataIntoCache(cacheName: string, response: string) {
 // Function to get cache data
 async function getCacheData(name: string) {
     let cacheDataArray: string[] = []
-    let url = "https://cs32termproject.web.app/";
+    let url = "https://localhost:3000";
 
     // Opening that particular cache
     const cacheStorage = await caches.open(name);
