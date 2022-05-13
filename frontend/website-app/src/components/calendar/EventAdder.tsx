@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import AdderInput from "./AdderInput";
 import Event from "./Event";
 import {writeNewEvent} from "./CalendarFB";
+import {Toaster} from "react-hot-toast";
 
 function EventAdder() {
     const [showForm, setShowForm] = useState(false);
@@ -27,12 +28,13 @@ function EventAdder() {
     }
 
     return  <div className={"event-adder"}>
-                <button onClick={()=>setShowForm(!showForm)}>Show adder menu</button>
+                <Toaster/>
+                <button onClick={()=>setShowForm(!showForm)}>Add an Event</button>
         {showForm ? <div id={"event-adder-form"}>
-                        <AdderInput label={"Date (yyyy-mm-dd):"} change={setDate} type={"date"}/>
+                        <AdderInput label={"Date:"} change={setDate} type={"date"}/>
                         <AdderInput label={"Event Name:"} change={setEventName} type={"text"}/>
-                        <AdderInput label={"Start Time:"} change={setEventStart} type={"text"}/>
-                        <AdderInput label={"End Time:"} change={setEventEnd} type={"text"}/>
+                        <AdderInput label={"Start Time:"} change={setEventStart} type={"time"}/>
+                        <AdderInput label={"End Time:"} change={setEventEnd} type={"time"}/>
                         <AdderInput label={"Extra Info/Description:"} change={setEventInfo} type={"text"}/>
                         <button onClick={sendEventToBackend}>Add Event!</button>
                     </div> : null}

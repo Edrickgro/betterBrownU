@@ -3,6 +3,7 @@ import Event from "./Event";
 
 
 type event = {
+    eventID : number;
     eventName : string;
     startTime : string;
     endTime : string;
@@ -19,7 +20,8 @@ function Date (info : dateInfo) {
         let eventObjects = [];
         for (let i = 0; i < info.events.length; i++) {
             eventObjects.push(
-                <Event eventName={info.events[i].eventName}
+                <Event date = {info.date} eventID = {info.events[i].eventID}
+                        eventName={info.events[i].eventName}
                        startTime={info.events[i].startTime}
                        endTime={info.events[i].endTime}
                        info={info.events[i].info}

@@ -1,7 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { Console } from "console";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue} from 'firebase/database';
+import { getDatabase, ref, set, onValue, remove} from 'firebase/database';
+import 'materialize-css';
+import {toast} from "react-hot-toast";
 
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -76,7 +78,23 @@ function writeNewEvent(event: event, date: string) : void{
         startTime: event.startTime,
         endTime: event.endTime,
         info: event.info
+    }).then(() => {toast("\""+event.eventName + "\" added to the calendar!")}).catch((error) => {
+        console.log(error);
+        toast.error("There was an error submitting your event");
     })
+}
+
+/**
+ * Remove the event from the database. TODO: then refresh
+ * @param eventID: the ID of the event to be deleted
+ * @param date: the date for the event
+ */
+function deleteEvent(eventID: number, date: string) : void {
+    const reference = ref(db, 'Dates/' + date + '/' + eventID);
+    console.log("delete: " + reference);
+    remove(reference)
+        .catch(()=>{toast.error("There was an error removing the event")})
+        .then(()=>{toast.success("Event deleted!")})
 }
 
 /**
@@ -147,4 +165,4 @@ function getAllDates() : dateInfo[] {
 // writeEvent("lunch", "12:00", "13:00", "food optional", "2022-04-29", "1");
 
 // TODO: figure out what to export
-export {getAllDates, writeNewEvent}
+export {getAllDates, writeNewEvent, deleteEvent}
