@@ -4,6 +4,11 @@ button {
     border-radius: 5px;
 }
 
+.date-list{
+    justify-content: left;
+    text-align: left;
+}
+
 .event-item button{
     background-color: grey;
     margin-bottom: 7%;
@@ -55,4 +60,5 @@ p.event-item-title {
 .date-error-message {
     padding: 1%;
     font-style: italic;
+    text-align: center;
 }
