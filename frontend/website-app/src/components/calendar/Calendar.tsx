@@ -3,6 +3,7 @@ import DateElement from "./Date"
 import EventAdder from "./EventAdder"
 import {getAllDates} from "./CalendarFB";
 import "./Calendar.css"
+import {signedIn, signInWithGoogle} from "../../firebase";
 
 //TODO is there a way to have this be a global type so I don't have to reimport
 type event = {
@@ -31,9 +32,14 @@ function Calendar () {
      *
      */
     function load_data () {
-        let dateInfoList : {[date : string] : dateInfo} = getAllDates()
-        setDateList(dateInfoList);
-        // incorporateRSSFeed();
+        if(signedIn) {
+            let dateInfoList : {[date : string] : dateInfo} = getAllDates()
+            setDateList(dateInfoList);
+            // incorporateRSSFeed();
+        }else{
+            signInWithGoogle();
+        }
+       
     }
 
     /**
