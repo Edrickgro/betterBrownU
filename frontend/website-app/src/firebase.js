@@ -29,13 +29,16 @@ export const db = getDatabase();
 const provider = new GoogleAuthProvider();
 export let signedIn = false;
 export const validIds = [];
+let name = null;
+let email = null;
+let profilePic = null;
 
 
 export const signInWithGoogle = () => {
     signInWithPopup(auth, provider).then((result) => {
-        const name = result.user.displayName;
-        const email = result.user.email;
-        const profilePic = result.user.photoURL;
+        name = result.user.displayName;
+        email = result.user.email;
+        profilePic = result.user.photoURL;
         signedIn = true;
 
         //to be used for associating account with events
@@ -54,10 +57,13 @@ export const signInWithGoogle = () => {
 export const signOutofAccount = () => {
     signOut(auth, provider).then(() => {
         // @ts-ignore
-        const name = "";
-        const email = "";
+        name = "";
+        email = "";
+        profilePic = "";
+        signedIn = false;
         localStorage.setItem("name", name);
         localStorage.setItem("email", email);
+        localStorage.setItem("profilePic", profilePic);
         console.log("signed out")
     });
 }

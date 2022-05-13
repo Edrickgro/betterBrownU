@@ -14,6 +14,7 @@ import Account from "./components/account/Account";
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
 root.render(
     <Router>
         <Navigation/>

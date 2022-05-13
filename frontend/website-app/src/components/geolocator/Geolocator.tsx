@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import {db} from "../../firebase";
+import {db, signedIn, signInWithGoogle} from "../../firebase";
 import { onValue, ref, runTransaction } from "firebase/database";
 
 // Location interface used to represent campus locations
@@ -343,7 +343,6 @@ async function getCacheData(name: string, url: string) {
 * Locations page.
 */
 function Geolocator() {
-
     console.log("ERROR CHECK: RENDER")
 
     const [database, setDatabase] = useState<Location[]>([])
@@ -353,7 +352,7 @@ function Geolocator() {
         getCacheData("GeolocatorCache", "https://localhost:3000")
         getJsonList(setDatabase)
         setInterval(() => geoFindMe(database), 600000) // 10 minutes
-    }, []);
+        }, []);
 
     return (
         <main id="geolocatorMain">
@@ -363,12 +362,14 @@ function Geolocator() {
                     <button className="geoInlineBlock1" id="geolocator-load" onClick={() => {
                         geoFindMe(database)
                         console.log("ERROR CHECK: refresh")
-                    }}>Refresh Your Location!</button>
-                    <p id = "status"></p>
+                    }}>Refresh Your Location!
+                    </button>
+                    <p id="status"></p>
 
                     <div>
                         <h6 className="geoInlineBlock2">Search a location:</h6>
-                        <input className="geoInlineBlock2" placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displaySearch()}/>
+                        <input className="geoInlineBlock2" placeholder="Search a location!"
+                               id="geolocator-search-bar" onChange={() => displaySearch()}/>
                     </div>
 
                     <table className="geolocator-table" id="geolocator-table">
@@ -378,19 +379,21 @@ function Geolocator() {
                                 item =>
                                     <tr className="table-row" id={"table-row-" + item.Search}>
                                         <td className="table-location" id={"table-name-" + item.Name}>{item.Name}</td>
-                                        <td className={"table-" + findBusiness(item)} id={"table-business-" + item.Name}>{findBusiness(item)}</td>
+                                        <td className={"table-" + findBusiness(item)}
+                                            id={"table-business-" + item.Name}>{findBusiness(item)}</td>
                                         <td id={"table-occupancy-" + item.Name}>{item.Occupancy}</td>
                                     </tr>)}
                         </tbody>
                     </table>
-                </div>
+                    </div>
             </section>
 
-            <section className = "glassGeolocatorMap" id="geolocator-map">
-                <iframe id = "openstreetmap" src=''></iframe>
+            <section className="glassGeolocatorMap" id="geolocator-map">
+                <iframe id="openstreetmap" src=''></iframe>
             </section>
         </main>
-    );
+        );
+
 }
 
 export default Geolocator;

@@ -7,7 +7,7 @@ const table: HTMLTableElement = document.getElementById("geolocator-table") as H
 let link = ""
 function signIn() {
     if(signedIn){
-        link = "/campus-locations"
+
     }else {
         signInWithGoogle();
     }
@@ -36,7 +36,7 @@ function Navigation() {
                         Calendar
                     </NavLink>
 
-                    <NavLink className= "nav-link" to="/campus-locations">
+                    <NavLink className= "nav-link" onClick={signIn} to="/campus-locations">
                         Campus Locations
                     </NavLink>
 
