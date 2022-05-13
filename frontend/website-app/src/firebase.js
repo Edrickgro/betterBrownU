@@ -34,6 +34,11 @@ let email = null;
 let profilePic = null;
 
 
+/**
+ * This function is used whne you want to sign in. Using google auth it
+ * fetches the users name, email and profile pic. It stores them in a local
+ * storage, so it can be accessed by the account page
+ */
 export const signInWithGoogle = () => {
     signInWithPopup(auth, provider).then((result) => {
         name = result.user.displayName;
@@ -54,6 +59,11 @@ export const signInWithGoogle = () => {
     });
 }
 
+/**
+ * This function is used when you want a sign out to occur.
+ * It resets the values stored in the local storage so that
+ * it is no longer accessible.
+ */
 export const signOutofAccount = () => {
     signOut(auth, provider).then(() => {
         // @ts-ignore
