@@ -1,8 +1,8 @@
 import React, {useState} from 'react'
 import DateElement from "./Date"
 import EventAdder from "./EventAdder"
-import {getAllDates, writeNewEvent} from "./CalendarFB";
-import {signedIn, signInWithGoogle} from "../../firebase";
+import {getAllDates} from "./CalendarFB";
+import "./Calendar.css"
 
 //TODO is there a way to have this be a global type so I don't have to reimport
 type event = {
@@ -27,17 +27,57 @@ function Calendar () {
     const [dateList, setDateList] = useState<{[date: string] : dateInfo}>()
 
 
+    /**
+     *
+     */
     function load_data () {
-        if(signedIn){
-            setDateList(getAllDates());
-        }else {
-            signInWithGoogle();
-        }
+        let dateInfoList : {[date : string] : dateInfo} = getAllDates()
+        setDateList(dateInfoList);
+        // incorporateRSSFeed();
     }
 
-    function getCalendarInfo() : {[date : string] : dateInfo}{
-        let dateInfoList : {[date : string] : dateInfo} = getAllDates()
-        return dateInfoList;
+    /**
+     * Pulls froms the specified RSS feed to add it to the list.
+     * @param currentInfo The current dictionary of dates
+     */
+    function incorporateRSSFeed() : void {
+        const RSS_URL : string = "https://events.brown.edu/live/rss/events/header/All%20Events";
+        fetch(RSS_URL).then(response => response.text())
+            .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+            .then(data => {
+            const items = data.querySelectorAll("item");
+            console.log(data)
+            items.forEach(el => {
+                let titleObject = el.querySelector("title")
+                let dateObject = el.querySelector("pubDate")
+                let eventTitle : string = "";
+                let pubDate : string = "";
+                let dateAbbreviated : string = ""
+                let dateRaw : Date;
+                if (titleObject != null) {
+                    eventTitle = titleObject.innerHTML
+                }
+                if (dateObject != null) {
+                    pubDate = dateObject.innerHTML
+                    dateRaw = new Date(pubDate)
+                    dateAbbreviated = dateRaw.toISOString().split('T')[0]
+                }
+
+                const newEvent = {
+                    eventID: -1,
+                    startTime: "0:01",
+                    endTime: "11:59",
+                    eventName: eventTitle,
+                    info: "Event through Brown University Portal"
+                };
+                if (dateList) {
+                    if (dateList[dateAbbreviated]) {
+                        dateList[dateAbbreviated].events.push(newEvent)
+                    }
+                    console.log(dateList[dateAbbreviated])
+                }
+            })
+        })
     }
 
     /**
@@ -47,10 +87,8 @@ function Calendar () {
         if (dateList === undefined) {
             return <p className={"date-error-message"}>Dates have not been generated yet. Click button above to load.</p>
         } else {
-            console.log(dateList)
             let dates = [];
             for (let dateName in dateList) {
-                console.log(dateName)
                 dates.push(<DateElement date={dateList[dateName].date} events={dateList[dateName].events}/>);
             }
             return dates;
