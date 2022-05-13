@@ -1,11 +1,12 @@
 import React, {useState} from 'react'
-import Date from "./Date"
+import DateElement from "./Date"
 import EventAdder from "./EventAdder"
 import {getAllDates, writeNewEvent} from "./CalendarFB";
 import {signedIn, signInWithGoogle} from "../../firebase";
 
 //TODO is there a way to have this be a global type so I don't have to reimport
 type event = {
+    eventID : number;
     eventName : string;
     startTime : string;
     endTime : string;
@@ -23,63 +24,19 @@ type dateInfo = {
  * @constructor
  */
 function Calendar () {
-    const [dateList, setDateList] = useState<dateInfo[]>()
-    /**
-     * TODO REPLACE THIS FUNCTION WITH BACKEND STUFF WHEN READY.
-     * Currently filled with/returning fake dates.
-     */
+    const [dateList, setDateList] = useState<{[date: string] : dateInfo}>()
+
 
     function load_data () {
         if(signedIn){
-            setDateList(getCalendarInfo());
+            setDateList(getAllDates());
         }else {
             signInWithGoogle();
         }
-
     }
 
-    function getCalendarInfo() : dateInfo[]{
-        // let event1 =  {
-        //     eventName: "sport1",
-        //     startTime: "8:00am",
-        //     endTime: "10:00am",
-        //     info: "it's behind the OMAC"
-        // }
-        // let event2 = {
-        //     eventName: "sport2",
-        //     startTime: "5:00pm",
-        //     endTime: "7:30pm",
-        //     info: "brown school spirit rah rah"
-        // }
-        // let event3 = {
-        //     eventName: "acapella",
-        //     startTime: "9:00pm",
-        //     endTime: "11:00pm",
-        //     info: "we have so many acapella troupes at this school"
-        // }
-        // let event4 = {
-        //     eventName: "concert",
-        //     startTime: "3:00pm",
-        //     endTime: "7:00pm",
-        //     info: "I feel like we have more theaters than we use"
-        // }
-        // let event5 = {
-        //     eventName: "Bill Clinton Speaking??",
-        //     startTime: "5pm",
-        //     endTime: "6pm",
-        //     info: "located somewhere in watson"
-        // }
-        //
-        // let eventList1 : event[] = [event1, event2]
-        // let eventList2 : event[] = [event3, event4]
-        // let eventList3 : event[] = [event5]
-        //
-        // let date1 : dateInfo = {date: "10/31/2001", events: eventList1}
-        // let date2 : dateInfo = {date: "2/13/2002", events: eventList2}
-        // let date3 : dateInfo = {date: "6/14/2002", events: eventList3}
-        //
-        // let fakeDatesArr : dateInfo[] = [date1, date2, date3];
-        let dateInfoList : dateInfo[] = getAllDates()
+    function getCalendarInfo() : {[date : string] : dateInfo}{
+        let dateInfoList : {[date : string] : dateInfo} = getAllDates()
         return dateInfoList;
     }
 
@@ -88,18 +45,20 @@ function Calendar () {
      */
     function generateDates() {
         if (dateList === undefined) {
-            return <p>Dates have not been generated yet</p>
+            return <p className={"date-error-message"}>Dates have not been generated yet. Click button above to load.</p>
         } else {
+            console.log(dateList)
             let dates = [];
-            for (let i = 0; i<dateList.length; i++) {
-                dates.push(<Date date={dateList[i].date} events={dateList[i].events}/>);
+            for (let dateName in dateList) {
+                console.log(dateName)
+                dates.push(<DateElement date={dateList[dateName].date} events={dateList[dateName].events}/>);
             }
             return dates;
         }
     }
 
     return (
-        <div className="menu-item calendar">
+        <div className="menu-item calendar" onLoad={load_data}>
             <h3>Calendar</h3>
             <EventAdder/>
             <button onClick={load_data}>Click to (re)load!</button>

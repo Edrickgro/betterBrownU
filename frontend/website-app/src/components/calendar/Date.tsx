@@ -3,6 +3,7 @@ import Event from "./Event";
 
 
 type event = {
+    eventID : number;
     eventName : string;
     startTime : string;
     endTime : string;
@@ -14,12 +15,13 @@ type dateInfo = {
     events : event[];
 }
 
-function Date (info : dateInfo) {
+function DateElement (info : dateInfo) {
     function generate_events() {
         let eventObjects = [];
         for (let i = 0; i < info.events.length; i++) {
             eventObjects.push(
-                <Event eventName={info.events[i].eventName}
+                <Event date = {info.date} eventID = {info.events[i].eventID}
+                       eventName={info.events[i].eventName}
                        startTime={info.events[i].startTime}
                        endTime={info.events[i].endTime}
                        info={info.events[i].info}
@@ -29,7 +31,12 @@ function Date (info : dateInfo) {
     }
     return (
         <div className={"date-row"}>
-            <h3 className={"date-header-date"}>Date: {info.date}</h3>
+            <h3 className={"date-header-date"}>{(new Date(info.date)).toLocaleString(undefined,{
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })}</h3>
             <div className={"dates"}>
                 {generate_events()}
             </div>
@@ -37,4 +44,4 @@ function Date (info : dateInfo) {
     )
 }
 
-export default Date
+export default DateElement
