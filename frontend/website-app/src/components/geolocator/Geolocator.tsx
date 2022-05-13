@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import {db} from "../../firebase";
+import {db, signedIn, signInWithGoogle} from "../../firebase";
 import { onValue, ref, runTransaction } from "firebase/database";
 
 // Location interface used to represent campus locations
@@ -21,24 +21,9 @@ let userLocation: string | null = null;
 // Ratio used to determine how busy a campus location is
 const occupancyRatio = [0.33, 0.66];
 
-// // Initialize Firebase app
-// const firebaseApp = initializeApp({
-//     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
-//     authDomain: "cs32termproject.firebaseapp.com",
-//     projectId: "cs32termproject",
-//     storageBucket: "cs32termproject.appspot.com",
-//     messagingSenderId: "586091400920",
-//     appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
-//     measurementId: "G-VP24Q6Q0E3"
-//
-// });
-
-// Connect to Firebase database
-// const db = getDatabase();
 
 // Decrements the occupancy of a campus location by 1
 function decrement(ID: string){
-    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
@@ -53,7 +38,6 @@ function decrement(ID: string){
 
 // Increments the occupancy of a campus location by 1
 function increment(ID: string){
-    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
@@ -65,14 +49,11 @@ function increment(ID: string){
 
 // Converts Firebase database into a list of Locations and returns that list
 function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]>>) {
-
-    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/');
     let isInitial = true;
 
     //iteration method (Location interface)
-    onValue(distanceRef, (snapshot) =>{
-        console.log("ERROR CHECK: ONVALUE COMPLETE.")
+    onValue(distanceRef, (snapshot) => {
         let list: Location[] = [];
         let json = snapshot.val();
         for(let i in json) {
@@ -82,7 +63,6 @@ function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]
         setDatabase(list)
 
         if (isInitial) {
-            console.log("ERROR CHECK: INITIAL GETJSON")
             geoFindMe(list);
             isInitial = false;
         }
@@ -93,34 +73,25 @@ function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]
 function geoFindMe(database: Location[] | null) {
 
     const status: HTMLElement | null = document.getElementById("status")
-    //const mapLink: HTMLAnchorElement | null = document.getElementById("map-link") as HTMLAnchorElement;
     const mapLink: HTMLIFrameElement | null = document.getElementById("openstreetmap") as HTMLIFrameElement;
     const table: HTMLTableElement = document.getElementById("geolocator-table") as HTMLTableElement;
     const map: HTMLElement = document.getElementById("geolocator-map") as HTMLElement;
 
-    //mapLink!.href = '';
-    //mapLink!.textContent = '';
-
+    /*
+    * Called when location access is successful.
+    * Gets user's coordinates and calls checkUserCoords.
+    */
     function success(position: any) {
         table.style.display = "";
         map.style.display = "";
-        console.log("ERROR CHECK: GETTING LOCATION")
         const latitude  = position.coords.latitude;
         const longitude = position.coords.longitude;
-
-        console.log("ERROR CHECK: COORDS ARE... lat: " + latitude + " long: " + longitude)
         checkUserCoords(database, [longitude, latitude])
-
         status!.textContent = '';
-        //mapLink!.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
-        //mapLink!.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
-
         const longitudeTest = longitude - 0.00125588884355 + 0.00005;
         const latitudeTest = latitude - 0.00078782516225 + 0.00005;
-
         const latitude2 = latitudeTest + 0.00251054763794;
         const longitude2 = longitudeTest + 0.00157298212822;
-
         mapLink!.src = `https://www.openstreetmap.org/export/embed.html?bbox=${longitudeTest}%2C${latitudeTest}%2C${longitude2}%2C${latitude2}&amp;layer=mapnik`;
     }
 
@@ -132,18 +103,16 @@ function geoFindMe(database: Location[] | null) {
     }
 
     if(!navigator.geolocation) {
-        console.log("WORK");
         status!.textContent = 'Geolocation is not supported by your browser';
     } else {
         let options = {
-            enableHighAccuracy: false,
+            enableHighAccuracy: true,
             timeout: 5000,
             maximumAge: 0
         };
         status!.textContent = 'Locating…';
         navigator.geolocation.getCurrentPosition(success, error, options);
     }
-
 }
 
 /*
@@ -231,21 +200,20 @@ function checkUserCoords(database: Location[] | null, userCoords: number[] | nul
     for (let location of database) {
 
         if (isInRadius(location.Radius, location.Longitude, location.Latitude, userCoords[0], userCoords[1])) {
-            isInSomeLocation = true
 
+            isInSomeLocation = true
             if (!userLocation) {
                 // If user was not in a campus location before
                 increment(location.Name)
-                addDataIntoCache("GeolocatorCache", "https://localhost:3000", location.Name)
+                addDataIntoCache("GeolocatorCache", location.Name)
             } else if (location.Name !== userLocation) {
                 // If user moved from one campus location to another
-                console.log("ERROR CHECK: userLocation: " + userLocation + " , newLocation: " + location.Name)
                 decrement(userLocation)
                 increment(location.Name)
-                addDataIntoCache("GeolocatorCache", "https://localhost:3000", location.Name)
+                addDataIntoCache("GeolocatorCache", location.Name)
             }
 
-            console.log("ERROR CHECK: location is..." + location.Name)
+            console.log("Your location is..." + location.Name)
             // Set userLocation to the user's current location
             userLocation = location.Name
             break;
@@ -256,7 +224,7 @@ function checkUserCoords(database: Location[] | null, userCoords: number[] | nul
     if (!isInSomeLocation && userLocation) {
         decrement(userLocation)
         userLocation = null
-        addDataIntoCache("GeolocatorCache", "https://localhost:3000", "null")
+        addDataIntoCache("GeolocatorCache", "null")
     }
 }
 
@@ -275,10 +243,11 @@ function findBusiness(location: Location): string {
     }
 }
 
-// Function to add our give data into cache
-function addDataIntoCache(cacheName: string, url: string, response: string) {
+// Function to add data into cache
+function addDataIntoCache(cacheName: string, response: string) {
     // Converting our response into Actual Response form
     const data = new Response(JSON.stringify(response));
+    let url = "https://localhost:3000";
 
     if ('caches' in window) {
         // Opening given cache and putting our data into it
@@ -289,8 +258,9 @@ function addDataIntoCache(cacheName: string, url: string, response: string) {
 }
 
 // Function to get cache data
-async function getCacheData(name: string, url: string) {
+async function getCacheData(name: string) {
     let cacheDataArray: string[] = []
+    let url = "https://localhost:3000";
 
     // Opening that particular cache
     const cacheStorage = await caches.open(name);
@@ -298,7 +268,6 @@ async function getCacheData(name: string, url: string) {
     // Fetching that particular cache data
     const cachedResponse = await cacheStorage.match(url);
     if (!cachedResponse) {
-        console.log("ERROR CHECK: no cache")
         return;
     }
     var data = await cachedResponse.json()
@@ -306,35 +275,6 @@ async function getCacheData(name: string, url: string) {
     // Pushing fetched data into our cacheDataArray
     cacheDataArray.push(data)
     userLocation = cacheDataArray[cacheDataArray.length - 1]
-    console.log("ERROR CHECK: getcache... " + cacheDataArray[cacheDataArray.length - 1])
-    console.log("ERROR CHECK: getcache2..." + cacheDataArray)
-    /*
-        // List of all caches present in browser
-    let name =  //await caches.keys()
-
-    // Iterating over the list of caches
-    for (const name of names) {
-
-        // Opening that particular cache
-        const cacheStorage = await caches.open(name);
-
-        // Fetching that particular cache data
-        const cachedResponse = await cacheStorage.match(url);
-        if (!cachedResponse) {
-            console.log("ERROR CHECK: no cache")
-            continue;
-        }
-        var data = await cachedResponse.json()
-
-        // Pushing fetched data into our cacheDataArray
-        cacheDataArray.push(data)
-        userLocation = cacheDataArray[cacheDataArray.length - 1]
-        console.log("ERROR CHECK: getcache... " + cacheDataArray[cacheDataArray.length - 1])
-        //setCacheData(cacheDataArray.join(', '))
-        //console.log("ERROR CHECK: get cache... " + name + " , data: " + cacheDataArray.join(', '))
-    }
-
-     */
 }
 
 /*
@@ -343,17 +283,13 @@ async function getCacheData(name: string, url: string) {
 * Locations page.
 */
 function Geolocator() {
-
-    console.log("ERROR CHECK: RENDER")
-
     const [database, setDatabase] = useState<Location[]>([])
 
     useEffect(() => {
-        console.log("ERROR CHECK: useEffect 1")
-        getCacheData("GeolocatorCache", "https://localhost:3000")
+        getCacheData("GeolocatorCache")
         getJsonList(setDatabase)
         setInterval(() => geoFindMe(database), 600000) // 10 minutes
-    }, []);
+        }, []);
 
     return (
         <main id="geolocatorMain">
@@ -362,13 +298,12 @@ function Geolocator() {
                     <h3 className="geoInlineBlock1" id="geoCampusLoc">Campus Locations</h3>
                     <button className="geoInlineBlock1" id="geolocator-load" onClick={() => {
                         geoFindMe(database)
-                        console.log("ERROR CHECK: refresh")
                     }}>Refresh Your Location!</button>
                     <p id = "status"></p>
-
                     <div>
                         <h6 className="geoInlineBlock2">Search a location:</h6>
-                        <input className="geoInlineBlock2" placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displaySearch()}/>
+                        <input className="geoInlineBlock2" placeholder="Search a location!"
+                               id="geolocator-search-bar" onChange={() => displaySearch()}/>
                     </div>
 
                     <table className="geolocator-table" id="geolocator-table">
@@ -378,37 +313,21 @@ function Geolocator() {
                                 item =>
                                     <tr className="table-row" id={"table-row-" + item.Search}>
                                         <td className="table-location" id={"table-name-" + item.Name}>{item.Name}</td>
-                                        <td className={"table-" + findBusiness(item)} id={"table-business-" + item.Name}>{findBusiness(item)}</td>
+                                        <td className={"table-" + findBusiness(item)}
+                                            id={"table-business-" + item.Name}>{findBusiness(item)}</td>
                                         <td id={"table-occupancy-" + item.Name}>{item.Occupancy}</td>
                                     </tr>)}
                         </tbody>
                     </table>
-                </div>
+                    </div>
             </section>
 
-            <section className = "glassGeolocatorMap" id="geolocator-map">
-                <iframe id = "openstreetmap" src=''></iframe>
+            <section className="glassGeolocatorMap" id="geolocator-map">
+                <iframe id="openstreetmap" src=''></iframe>
             </section>
         </main>
-    );
+        );
+
 }
 
 export default Geolocator;
-
-/**
- * <button onClick={() => getCacheData("GeolocatorCache", "https://localhost:3000")}>get cache!</button>
- *
- * <p id = "status"></p>
- <a id = "map-link" target="_blank"></a>
- *
- *
- <button onClick={() => increment("Andrews Commons")}>increment andrews</button>
-
- {database?.map(
-                        item =>
-                            <tr className="table-row" id={item.Search}>
-                                <td className="table-location">{item.Name}</td>
-                                <td className={"table-" + findBusiness(item)}>{findBusiness(item)}</td>
-                                <td>{item.Occupancy}</td>
-                            </tr>)}
- */

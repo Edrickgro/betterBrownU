@@ -29,13 +29,21 @@ export const db = getDatabase();
 const provider = new GoogleAuthProvider();
 export let signedIn = false;
 export const validIds = [];
+let name = null;
+let email = null;
+let profilePic = null;
 
 
+/**
+ * This function is used whne you want to sign in. Using google auth it
+ * fetches the users name, email and profile pic. It stores them in a local
+ * storage, so it can be accessed by the account page
+ */
 export const signInWithGoogle = () => {
     signInWithPopup(auth, provider).then((result) => {
-        const name = result.user.displayName;
-        const email = result.user.email;
-        const profilePic = result.user.photoURL;
+        name = result.user.displayName;
+        email = result.user.email;
+        profilePic = result.user.photoURL;
         signedIn = true;
 
         //to be used for associating account with events
@@ -51,13 +59,21 @@ export const signInWithGoogle = () => {
     });
 }
 
+/**
+ * This function is used when you want a sign out to occur.
+ * It resets the values stored in the local storage so that
+ * it is no longer accessible.
+ */
 export const signOutofAccount = () => {
     signOut(auth, provider).then(() => {
         // @ts-ignore
-        const name = "";
-        const email = "";
+        name = "";
+        email = "";
+        profilePic = "";
+        signedIn = false;
         localStorage.setItem("name", name);
         localStorage.setItem("email", email);
+        localStorage.setItem("profilePic", profilePic);
         console.log("signed out")
     });
 }

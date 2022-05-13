@@ -6,22 +6,6 @@ import 'materialize-css';
 import {toast} from "react-hot-toast";
 import {db} from "../../firebase";
 
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
-//     authDomain: "cs32termproject.firebaseapp.com",
-//     projectId: "cs32termproject",
-//     storageBucket: "cs32termproject.appspot.com",
-//     messagingSenderId: "586091400920",
-//     appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
-//     measurementId: "G-VP24Q6Q0E3"
-// };
-
 // Structure of dates and events as defined in calendar.tsx
 type dateInfo = {
     date : string;
@@ -36,15 +20,13 @@ type event = {
     info : string;
 }
 
-// Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const db = getDatabase();
 
 /**
  * Get the next valid unique ID for a certain date. Loops through all the events on a particular date and adds
  * one to the highest ID found
  * @param date = the date that the particular event will be on
  */
+
 function nextValidID(date: string) : number {
     const dateRef = ref(db, 'Dates/' + date);
     let highestID : number = 0;
