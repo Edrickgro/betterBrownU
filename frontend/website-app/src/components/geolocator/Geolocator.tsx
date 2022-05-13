@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, onValue, ref, runTransaction } from "firebase/database";
+import {db} from "../../firebase";
+import { onValue, ref, runTransaction } from "firebase/database";
 
 // Location interface used to represent campus locations
 interface Location {
@@ -20,24 +21,24 @@ let userLocation: string | null = null;
 // Ratio used to determine how busy a campus location is
 const occupancyRatio = [0.33, 0.66];
 
-// Initialize Firebase app
-const firebaseApp = initializeApp({
-    apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
-    authDomain: "cs32termproject.firebaseapp.com",
-    projectId: "cs32termproject",
-    storageBucket: "cs32termproject.appspot.com",
-    messagingSenderId: "586091400920",
-    appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
-    measurementId: "G-VP24Q6Q0E3"
-
-});
+// // Initialize Firebase app
+// const firebaseApp = initializeApp({
+//     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
+//     authDomain: "cs32termproject.firebaseapp.com",
+//     projectId: "cs32termproject",
+//     storageBucket: "cs32termproject.appspot.com",
+//     messagingSenderId: "586091400920",
+//     appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
+//     measurementId: "G-VP24Q6Q0E3"
+//
+// });
 
 // Connect to Firebase database
-const db = getDatabase();
+// const db = getDatabase();
 
 // Decrements the occupancy of a campus location by 1
 function decrement(ID: string){
-    const db = getDatabase();
+    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
@@ -52,7 +53,7 @@ function decrement(ID: string){
 
 // Increments the occupancy of a campus location by 1
 function increment(ID: string){
-    const db = getDatabase();
+    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
@@ -65,7 +66,7 @@ function increment(ID: string){
 // Converts Firebase database into a list of Locations and returns that list
 function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]>>) {
 
-    const db = getDatabase();
+    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/');
     let isInitial = true;
 
