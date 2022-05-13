@@ -8,7 +8,7 @@ chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build());
 
 async function example(){
     let driver = await new Builder().forBrowser("chrome").build();
-    await driver.get("https://cs32termproject.web.app/");
+    await driver.get("https://google.com/");
 
 
      driver.findElements(By.className("nav-link")).then(function(elements){

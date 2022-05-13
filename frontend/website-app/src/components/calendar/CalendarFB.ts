@@ -99,7 +99,7 @@ function getAllDates() : dateInfo[] {
     const datesRef = ref(db, 'Dates/')
     const swRef = ref(db, datesRef.key + "/" + "2022-04-29")
     const badRef = ref(db, datesRef.key + "/" + "bad_ref")
-    // TODO: child() doesn't work? shitty workaround
+    // TODO: child() doesn't work? workaround
     let retDates : dateInfo[] = []
     // get all dates that have been added
 
@@ -140,4 +140,4 @@ function getAllDates() : dateInfo[] {
 // writeEvent("lunch", "12:00", "13:00", "food optional", "2022-04-29", "1");
 
 // TODO: figure out what to export
-export {getAllDates, writeNewEvent}
+export {getAllDates, writeNewEvent, getDateEvents}
