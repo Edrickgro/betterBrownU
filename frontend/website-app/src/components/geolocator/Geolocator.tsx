@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import {db} from "../../firebase";
+import {db, signedIn, signInWithGoogle} from "../../firebase";
 import { onValue, ref, runTransaction } from "firebase/database";
 
 // Location interface used to represent campus locations
@@ -21,24 +21,9 @@ let userLocation: string | null = null;
 // Ratio used to determine how busy a campus location is
 const occupancyRatio = [0.33, 0.66];
 
-// // Initialize Firebase app
-// const firebaseApp = initializeApp({
-//     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
-//     authDomain: "cs32termproject.firebaseapp.com",
-//     projectId: "cs32termproject",
-//     storageBucket: "cs32termproject.appspot.com",
-//     messagingSenderId: "586091400920",
-//     appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
-//     measurementId: "G-VP24Q6Q0E3"
-//
-// });
-
-// Connect to Firebase database
-// const db = getDatabase();
 
 // Decrements the occupancy of a campus location by 1
 function decrement(ID: string){
-    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
@@ -53,7 +38,6 @@ function decrement(ID: string){
 
 // Increments the occupancy of a campus location by 1
 function increment(ID: string){
-    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/' + ID);
 
     runTransaction(distanceRef, (post) => {
@@ -65,8 +49,6 @@ function increment(ID: string){
 
 // Converts Firebase database into a list of Locations and returns that list
 function getJsonList(setDatabase: React.Dispatch<React.SetStateAction<Location[]>>) {
-
-    // const db = getDatabase();
     const distanceRef = ref(db, 'Locations/');
     let isInitial = true;
 
@@ -301,14 +283,13 @@ async function getCacheData(name: string) {
 * Locations page.
 */
 function Geolocator() {
-
     const [database, setDatabase] = useState<Location[]>([])
 
     useEffect(() => {
         getCacheData("GeolocatorCache")
         getJsonList(setDatabase)
         setInterval(() => geoFindMe(database), 600000) // 10 minutes
-    }, []);
+        }, []);
 
     return (
         <main id="geolocatorMain">
@@ -319,10 +300,10 @@ function Geolocator() {
                         geoFindMe(database)
                     }}>Refresh Your Location!</button>
                     <p id = "status"></p>
-
                     <div>
                         <h6 className="geoInlineBlock2">Search a location:</h6>
-                        <input className="geoInlineBlock2" placeholder="Search a location!" id="geolocator-search-bar" onChange={() => displaySearch()}/>
+                        <input className="geoInlineBlock2" placeholder="Search a location!"
+                               id="geolocator-search-bar" onChange={() => displaySearch()}/>
                     </div>
 
                     <table className="geolocator-table" id="geolocator-table">
@@ -332,19 +313,21 @@ function Geolocator() {
                                 item =>
                                     <tr className="table-row" id={"table-row-" + item.Search}>
                                         <td className="table-location" id={"table-name-" + item.Name}>{item.Name}</td>
-                                        <td className={"table-" + findBusiness(item)} id={"table-business-" + item.Name}>{findBusiness(item)}</td>
+                                        <td className={"table-" + findBusiness(item)}
+                                            id={"table-business-" + item.Name}>{findBusiness(item)}</td>
                                         <td id={"table-occupancy-" + item.Name}>{item.Occupancy}</td>
                                     </tr>)}
                         </tbody>
                     </table>
-                </div>
+                    </div>
             </section>
 
-            <section className = "glassGeolocatorMap" id="geolocator-map">
-                <iframe id = "openstreetmap" src=''></iframe>
+            <section className="glassGeolocatorMap" id="geolocator-map">
+                <iframe id="openstreetmap" src=''></iframe>
             </section>
         </main>
-    );
+        );
+
 }
 
 export default Geolocator;

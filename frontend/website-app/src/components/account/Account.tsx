@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {signInWithGoogle, signOutofAccount} from "../../firebase";
+import {signOutofAccount} from "../../firebase";
 
 function Account() {
 
