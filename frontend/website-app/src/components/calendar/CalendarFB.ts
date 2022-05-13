@@ -4,22 +4,6 @@ import { initializeApp } from "firebase/app";
 import {ref, set, onValue} from 'firebase/database';
 import {db} from "../../firebase";
 
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
-//     authDomain: "cs32termproject.firebaseapp.com",
-//     projectId: "cs32termproject",
-//     storageBucket: "cs32termproject.appspot.com",
-//     messagingSenderId: "586091400920",
-//     appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
-//     measurementId: "G-VP24Q6Q0E3"
-// };
-
 // Structure of dates and events as defined in calendar.tsx
 type dateInfo = {
     date : string;
@@ -32,10 +16,6 @@ type event = {
     endTime : string;
     info : string;
 }
-
-// Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const db = getDatabase();
 
 function nextValidID(date: string) : number {
     const dateRef = ref(db, 'Dates/' + date);
