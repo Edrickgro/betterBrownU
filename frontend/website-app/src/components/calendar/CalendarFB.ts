@@ -4,6 +4,7 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, remove} from 'firebase/database';
 import 'materialize-css';
 import {toast} from "react-hot-toast";
+import {db} from "../../firebase";
 
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -11,15 +12,15 @@ import {toast} from "react-hot-toast";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-    apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
-    authDomain: "cs32termproject.firebaseapp.com",
-    projectId: "cs32termproject",
-    storageBucket: "cs32termproject.appspot.com",
-    messagingSenderId: "586091400920",
-    appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
-    measurementId: "G-VP24Q6Q0E3"
-};
+// const firebaseConfig = {
+//     apiKey: "AIzaSyDLBfzKNUMzRvsP_LeiRf31EJ-mJPVtf0o",
+//     authDomain: "cs32termproject.firebaseapp.com",
+//     projectId: "cs32termproject",
+//     storageBucket: "cs32termproject.appspot.com",
+//     messagingSenderId: "586091400920",
+//     appId: "1:586091400920:web:a8a56afdc0bee2fd3ad1ad",
+//     measurementId: "G-VP24Q6Q0E3"
+// };
 
 // Structure of dates and events as defined in calendar.tsx
 type dateInfo = {
@@ -36,8 +37,8 @@ type event = {
 }
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase();
+// const app = initializeApp(firebaseConfig);
+// const db = getDatabase();
 
 /**
  * Get the next valid unique ID for a certain date. Loops through all the events on a particular date and adds

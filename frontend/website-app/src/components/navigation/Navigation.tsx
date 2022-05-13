@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 import { NavLink } from "react-router-dom";
+import {signedIn, signInWithGoogle} from "../../firebase";
+
+const table: HTMLTableElement = document.getElementById("geolocator-table") as HTMLTableElement;
+
+let link = ""
+function signIn() {
+    if(signedIn){
+        link = "/campus-locations"
+    }else {
+        signInWithGoogle();
+    }
+}
 
 function Navigation() {
+
 
     return (
 
@@ -23,7 +36,7 @@ function Navigation() {
                         Calendar
                     </NavLink>
 
-                    <NavLink className="nav-link" to="/campus-locations">
+                    <NavLink className= "nav-link" to="/campus-locations">
                         Campus Locations
                     </NavLink>
 
@@ -37,6 +50,8 @@ function Navigation() {
 }
 
 export default Navigation;
+
+
 
 /**
  <div className="Menu">
