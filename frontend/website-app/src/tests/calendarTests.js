@@ -38,19 +38,42 @@ let seleniumEventList = []
  * Helper method for comparing the events stored in the calendar vs the events in database
  */
 function arraysEqual() { 
-  firebaseEventList.forEach(function(eventString) { 
-    if (!seleniumEventList.includes(eventString)) { 
-      Console.log("Failed: Event " + eventString + "in db not read from page")
-      return
+  // Initialize the maps (Didn't want to go through each function and change it to use the maps)
+  let firebaseMap = new Map()
+  firebaseEventList.forEach(function(eventString) {
+    if (firebaseMap.has(eventString)) { 
+      firebaseMap.set(eventString, firebaseMap.get(eventString) + 1)
+    } 
+    else { 
+      firebaseMap.set(eventString, 1)
     }
   })
-  seleniumEventList.forEach(function(eventString) { 
-    if (!firebaseEventList.includes(eventString)) { 
-      Console.log("Failed: Event " + eventString + "in db not read from page")
-      return
+  let seleniumMap = new Map()
+  seleniumEventList.forEach(function(eventString) {
+    if (seleniumMap.has(eventString)) { 
+      seleniumMap.set(eventString, seleniumMap.get(eventString) + 1)
+    } 
+    else { 
+      seleniumMap.set(eventString, 1)
     }
   })
+  // go through the keys and make sure values match
+  for (const key of firebaseMap.keys()) { 
+    if (firebaseMap.get(key) != seleniumMap.get(key)) {
+      Console.log("Failed: Event " + key + " has different values in firebase and selenium maps")
+      return
+    }
+  }
+  // same for selenium map
+  for (const key of seleniumMap.keys()) { 
+    if (firebaseMap.get(key) != seleniumMap.get(key)) {
+      Console.log("Failed: Event " + key + " has different values in firebase and selenium maps")
+      return
+    }
+  }
 }
+
+
 
 /**
  * Hit the load button and make sure that the calendar is in a valid state. 
